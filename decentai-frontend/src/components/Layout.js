@@ -84,7 +84,7 @@ const Layout = ({ children }) => {
             <div className="relative">
               <button className="flex items-center space-x-2 text-gray-300 hover:text-white">
                 <div className="w-8 h-8 bg-gray-600 rounded-full"></div>
-                <span className="hidden md:inline">John Doe</span>
+                <span className="hidden md:inline">Nafis Rayan</span>
               </button>
             </div>
           </div>
