@@ -134,10 +134,11 @@ const DataUploadPage = () => {
               <div>
                 <label className="block text-gray-300 mb-2">Database Type</label>
                 <select className="w-full bg-gray-600 text-white rounded-lg px-4 py-2">
-                  <option>PostgreSQL</option>
-                  <option>MySQL</option>
-                  <option>MongoDB</option>
-                  <option>SQLite</option>
+                <option>SQLite</option>
+                <option>MongoDB</option>
+                <option>JSON</option>
+                <option>MySQL</option>
+                <option>PostgreSQL</option>
                 </select>
               </div>
               <div>

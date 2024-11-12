@@ -123,7 +123,7 @@ const SupplyChainPage = () => {
         </div>
 
         {/* Blockchain Verification */}
-        <div className="bg-gray-800 rounded-lg p-6">
+        <div className="bg-gray-800 rounded-lg p-6 mt-8">
           <h3 className="text-xl font-bold text-white mb-4">Blockchain Verification</h3>
           <div className="bg-gray-700 rounded-lg p-4">
             <p className="text-gray-300 text-sm mb-2">Last verified: 2 minutes ago</p>
