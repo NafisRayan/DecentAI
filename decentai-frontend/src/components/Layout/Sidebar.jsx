@@ -17,9 +17,9 @@ const Sidebar = ({ isAdmin }) => {
     { name: 'Dashboard', icon: HomeIcon, path: '/' },
     { name: 'Currency Points', icon: CurrencyDollarIcon, path: '/points' },
     { name: 'Chat', icon: ChatBubbleLeftIcon, path: '/chat' },
+    { name: 'AI Chat', icon: SparklesIcon, path: '/ai-chat' },
     { name: 'Polls', icon: ChartBarIcon, path: '/polls' },
     { name: 'Profile', icon: UserIcon, path: '/profile' },
-    { name: 'AI Chat', icon: SparklesIcon, path: '/ai-chat' },
   ];
 
   const adminNavigation = [

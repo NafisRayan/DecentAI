@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import { FaMicrophone, FaVolumeUp } from 'react-icons/fa';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 function AIChat() {
   const [messages, setMessages] = useState([]);
@@ -9,6 +11,48 @@ function AIChat() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const readOutLoud = (text) => {
+    const speech = new SpeechSynthesisUtterance();
+    speech.text = text;
+    window.speechSynthesis.speak(speech);
+  };
+
+  const startSpeechRecognition = () => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.continuous = false;
+
+      recognition.onstart = () => {
+        console.log('Speech recognition started');
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error:", event.error);
+      };
+
+      recognition.onresult = (event) => {
+        if (event.results[0] && event.results[0].isFinal) {
+          setInput(prev => prev + event.results[0][0].transcript + ' ');
+        }
+      };
+
+      try {
+        recognition.start();
+      } catch (error) {
+        console.error("Failed to start speech recognition:", error);
+      }
+    } else {
+      alert('Your browser does not support speech recognition.');
+    }
+  };
+
+  const genAI = new GoogleGenerativeAI("AIzaSyCMenNFHgeac3eUnjq5XeqDPzJvyng8LWM");
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,17 +69,30 @@ function AIChat() {
     setInput('');
     setIsLoading(true);
 
-    // Simulate AI response (replace with actual API call)
-    setTimeout(() => {
+    try {
+      const result = await model.generateContent(input);
+      const botResponse = result.response.text();
+
       const aiMessage = {
         id: messages.length + 2,
         role: 'assistant',
-        content: `This is a simulated AI response to: "${input}"`,
+        content: botResponse,
         timestamp: new Date().toISOString()
       };
+
       setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Error in AI response:', error);
+      const errorMessage = {
+        id: messages.length + 2,
+        role: 'assistant',
+        content: 'Sorry, I encountered an error. Please try again.',
+        timestamp: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -47,7 +104,7 @@ function AIChat() {
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`mb-4 flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`mb-4 flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} items-center`}
             >
               <div className={`max-w-[70%] rounded-lg p-3 ${
                 message.role === 'user' ? 'bg-primary text-white' : 'bg-gray-100'
@@ -57,12 +114,20 @@ function AIChat() {
                   {new Date(message.timestamp).toLocaleTimeString()}
                 </p>
               </div>
+              {message.role === 'assistant' && (
+                <button
+                  onClick={() => readOutLoud(message.content)}
+                  className="ml-2 p-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                >
+                  <FaVolumeUp />
+                </button>
+              )}
             </div>
           ))}
           {isLoading && (
             <div className="flex justify-start mb-4">
               <div className="bg-gray-100 rounded-lg p-3">
-                <p className="animate-pulse">AI is typing...</p>
+                <p className="animate-pulse">AI is thinking...</p>
               </div>
             </div>
           )}
@@ -71,6 +136,13 @@ function AIChat() {
 
         <form onSubmit={handleSubmit} className="p-4 border-t">
           <div className="flex space-x-2">
+            <button
+              type="button"
+              onClick={startSpeechRecognition}
+              className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            >
+              <FaMicrophone />
+            </button>
             <input
               type="text"
               value={input}
