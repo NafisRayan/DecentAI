@@ -19,9 +19,7 @@ const Sidebar = () => {
     { name: 'Chat', icon: ChatBubbleLeftIcon, path: '/chat' },
     { name: 'AI Chat', icon: SparklesIcon, path: '/ai-chat' },
     { name: 'Polls', icon: ChartBarIcon, path: '/polls' },
-    { name: 'Statistics', icon: ChartBarIcon, path: '/statistics' },
-    // { name: 'Community', icon: UserIcon, path: '/community' },
-    { name: 'Analytics', icon: ChartBarIcon, path: '/analytics' },
+    { name: 'Data Analytics', icon: ChartBarIcon, path: '/data-analytics' },
     { name: 'Profile', icon: UserIcon, path: '/profile' },
     { name: 'Settings', icon: CogIcon, path: '/user-settings' },
     

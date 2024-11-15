@@ -9,10 +9,8 @@ import Polls from './pages/Polls';
 import Profile from './pages/Profile';
 import AIChat from './pages/AIChat';
 import UserManagement from './pages/admin/UserManagement';
-import Statistics from './pages/Statistics';
-// import Community from './pages/Community';
+import DataAnalytics from './pages/DataAnalytics';
 import UserSettings from './pages/UserSettings';
-import Analytics from './pages/Analytics';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -77,27 +75,15 @@ function App() {
             </ProtectedRoute>
           } />
 
-          <Route path="/statistics" element={
+          <Route path="/data-analytics" element={
             <ProtectedRoute>
-              <Statistics />
+              <DataAnalytics />
             </ProtectedRoute>
           } />
-
-          {/* <Route path="/community" element={
-            <ProtectedRoute>
-              <Community />
-            </ProtectedRoute>
-          } /> */}
 
           <Route path="/user-settings" element={
             <ProtectedRoute>
               <UserSettings />
-            </ProtectedRoute>
-          } />
-
-          <Route path="/analytics" element={
-            <ProtectedRoute>
-              <Analytics />
             </ProtectedRoute>
           } />
         </Routes>

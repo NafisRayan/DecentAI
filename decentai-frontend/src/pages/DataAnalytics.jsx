@@ -5,8 +5,7 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line
 } from 'recharts';
 
-function Analytics() {
-  const { user } = useAuth();
+function DataAnalytics() {
   const [data, setData] = useState({
     transactions: [],
     polls: [],
@@ -14,28 +13,44 @@ function Analytics() {
     error: null
   });
 
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalTransactions: 0,
+    totalPolls: 0,
+    activePolls: 0,
+  });
+
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
   const fetchData = useCallback(async () => {
     try {
-      const [transactions, polls] = await Promise.all([
+      const [users, transactions, polls] = await Promise.all([
+        fetch('http://localhost:5000/users').then(res => res.json()),
         fetch('http://localhost:5000/transactions').then(res => res.json()),
         fetch('http://localhost:5000/polls').then(res => res.json())
       ]);
 
-      setData(prev => ({
-        ...prev,
+      setData({
         transactions,
         polls,
         loading: false,
         error: null
-      }));
+      });
+
+      setStats({
+        totalUsers: users.length,
+        totalTransactions: transactions.length,
+        totalPolls: polls.length,
+        activePolls: polls.filter(poll => poll.active).length,
+      });
     } catch (error) {
-      setData(prev => ({
-        ...prev,
+      setData({
+        transactions: [],
+        polls: [],
         loading: false,
         error: 'Failed to load analytics data'
-      }));
+      });
+      console.error('Error fetching stats:', error);
     }
   }, []);
 
@@ -46,28 +61,22 @@ function Analytics() {
   const processedData = useMemo(() => {
     if (!data.transactions.length || !data.polls.length) return null;
 
-    const userTransactions = data.transactions
-      .filter(t => t.senderId === user.id || t.receiverId === user.id)
-      .map(t => ({
-        ...t,
-        amount: t.senderId === user.id ? -t.amount : t.amount,
-        date: new Date(t.timestamp).toLocaleDateString()
-      }));
-
-    const transactionsByDate = userTransactions.reduce((acc, curr) => {
-      if (!acc[curr.date]) acc[curr.date] = 0;
-      acc[curr.date] += curr.amount;
+    const transactionsByDate = data.transactions.reduce((acc, curr) => {
+      const date = new Date(curr.timestamp).toLocaleDateString();
+      if (!acc[date]) acc[date] = 0;
+      acc[date] += curr.amount;
       return acc;
     }, {});
 
     const pollParticipation = data.polls.reduce((acc, poll) => {
-      const hasVoted = poll.voters?.includes(user.id);
-      acc[hasVoted ? 'Participated' : 'Not Participated']++;
+      const totalVotes = poll.voters?.length || 0;
+      acc['Participated'] += totalVotes;
+      acc['Not Participated'] += (stats.totalUsers - totalVotes);
       return acc;
     }, { 'Participated': 0, 'Not Participated': 0 });
 
-    const totalAmount = userTransactions.reduce((sum, t) => sum + t.amount, 0);
-    const averageTransactionAmount = userTransactions.length ? (totalAmount / userTransactions.length).toFixed(2) : 0;
+    const totalAmount = data.transactions.reduce((sum, t) => sum + t.amount, 0);
+    const averageTransactionAmount = data.transactions.length ? (totalAmount / data.transactions.length).toFixed(2) : 0;
 
     return {
       transactionTrend: Object.entries(transactionsByDate).map(([date, amount]) => ({
@@ -80,7 +89,7 @@ function Analytics() {
       })),
       averageTransactionAmount
     };
-  }, [data.transactions, data.polls, user.id]);
+  }, [data.transactions, data.polls, stats.totalUsers]);
 
   if (data.loading) {
     return (
@@ -108,7 +117,29 @@ function Analytics() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Your Analytics</h1>
+      <h1 className="text-2xl font-bold mb-6">Platform Analytics & Statistics</h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h3 className="text-gray-500 text-sm">Total Users</h3>
+          <p className="text-2xl font-bold">{stats.totalUsers}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h3 className="text-gray-500 text-sm">Total Transactions</h3>
+          <p className="text-2xl font-bold">{stats.totalTransactions}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h3 className="text-gray-500 text-sm">Total Polls</h3>
+          <p className="text-2xl font-bold">{stats.totalPolls}</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h3 className="text-gray-500 text-sm">Active Polls</h3>
+          <p className="text-2xl font-bold">{stats.activePolls}</p>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-lg shadow">
@@ -120,10 +151,10 @@ function Analytics() {
               <YAxis />
               <Tooltip />
               <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="amount" 
-                stroke="#8884d8" 
+              <Line
+                type="monotone"
+                dataKey="amount"
+                stroke="#8884d8"
                 activeDot={{ r: 8 }}
               />
             </LineChart>
@@ -163,4 +194,4 @@ function Analytics() {
   );
 }
 
-export default Analytics;
+export default DataAnalytics; 

@@ -83,6 +83,21 @@
                 2,
                 3
             ]
+        },
+        {
+            "id": 3,
+            "title": "s",
+            "options": [
+                "s",
+                "s"
+            ],
+            "votes": {
+                "s": 1
+            },
+            "active": true,
+            "voters": [
+                3
+            ]
         }
     ]
 }
