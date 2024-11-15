@@ -95,6 +95,13 @@ function DataAnalytics() {
     };
   }, [data.transactions, data.polls, stats.totalUsers]);
 
+  const pollData = useMemo(() => {
+    return data.polls.map(poll => ({
+      question: poll.title,
+      votes: poll.voters?.length || 0
+    }));
+  }, [data.polls]);
+
   if (data.loading) {
     return (
       <div className="p-6">
@@ -190,8 +197,38 @@ function DataAnalytics() {
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4">Average Transaction Amount</h2>
-          <p className="text-2xl">{processedData?.averageTransactionAmount}</p>
+          <h2 className="text-lg font-semibold mb-4">Poll Results Distribution</h2>
+          <div className="flex justify-center">
+            <PieChart width={300} height={300}>
+              <Pie
+                data={pollData}
+                cx={150}
+                cy={150}
+                labelLine={false}
+                label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="votes"
+              >
+                {pollData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-lg font-semibold mb-4">Vote Distribution</h2>
+          <BarChart width={400} height={300} data={pollData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="question" label={{  }} />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="votes" fill="#8884d8" />
+          </BarChart>
         </div>
       </div>
 
