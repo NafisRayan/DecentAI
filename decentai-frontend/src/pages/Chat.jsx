@@ -1,14 +1,28 @@
 import { useState, useEffect, useRef } from 'react';
-import demoData from '../data/db.json';
 import { FaMicrophone, FaVolumeUp } from 'react-icons/fa';
+import { useAuth } from '../contexts/AuthContext';
 
 function Chat() {
+  const { user } = useAuth();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    setMessages(demoData.chats);
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/chats');
+        const data = await response.json();
+        setMessages(data);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    };
+
+    fetchMessages();
+    // Set up polling for new messages
+    const interval = setInterval(fetchMessages, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -54,20 +68,32 @@ function Chat() {
     }
   };
 
-  const handleSend = (e) => {
+  const handleSend = async (e) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
 
-    const message = {
-      id: messages.length + 1,
-      roomId: 'public',
-      userId: 1,
-      message: newMessage,
-      timestamp: new Date().toISOString()
-    };
+    try {
+      const response = await fetch('http://localhost:5000/chats', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          roomId: 'public',
+          userId: user.id,
+          message: newMessage,
+        }),
+      });
 
-    setMessages([...messages, message]);
-    setNewMessage('');
+      if (response.ok) {
+        const newMsg = await response.json();
+        setMessages(prev => [...prev, newMsg]);
+        setNewMessage('');
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
   };
 
   return (
@@ -79,17 +105,17 @@ function Chat() {
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`mb-4 flex ${message.userId === 1 ? 'justify-end' : 'justify-start'} items-center`}
+              className={`mb-4 flex ${message.userId === user.id ? 'justify-end' : 'justify-start'} items-center`}
             >
               <div className={`max-w-[70%] rounded-lg p-3 ${
-                message.userId === 1 ? 'bg-primary text-white' : 'bg-gray-100'
+                message.userId === user.id ? 'bg-primary text-white' : 'bg-gray-100'
               }`}>
                 <p>{message.message}</p>
                 <p className="text-xs mt-1 opacity-70">
                   {new Date(message.timestamp).toLocaleTimeString()}
                 </p>
               </div>
-              {message.userId !== 1 && (
+              {message.userId !== user.id && (
                 <button
                   onClick={() => readOutLoud(message.message)}
                   className="ml-2 p-2 bg-green-500 text-white rounded-lg hover:bg-green-600"

@@ -1,0 +1,126 @@
+{
+    "users": [
+        {
+            "username": "vau20",
+            "email": "nafisrayan123@gmail.com",
+            "password": "scrypt:32768:8:1$VK0CsN2h4HDqDjdr$c6ad59cf89193b7f88634dcd22f0fc69d8b42d29a0fbc11134833cbc99bc1c5f6e0d1d790663c7b2c1dc461b47bc55d39f8bb128afe59f819bab2c578a90f91f",
+            "id": 2,
+            "points": 0,
+            "avatar": "/default-avatar.png"
+        },
+        {
+            "username": "vau",
+            "email": "d@gmail.com",
+            "password": "scrypt:32768:8:1$9aouQx53s8ZK9gmX$4ca224fbf74c938912902179d3130f8be01f862b9c778fc1d30f30f427b4e7f1ec752b5350eefc5650196c1042ce442e5a558eb9c235d86758aa2226e10c6867",
+            "id": 3,
+            "points": 0,
+            "avatar": "/default-avatar.png"
+        }
+    ],
+    "transactions": [
+        {
+            "id": 1,
+            "senderId": 1,
+            "receiverId": 2,
+            "amount": 100,
+            "timestamp": "2024-03-20T10:00:00Z"
+        }
+    ],
+    "chats": [
+        {
+            "id": 1,
+            "roomId": "public",
+            "userId": 2,
+            "message": "Hello everyone!",
+            "timestamp": "2024-03-20T09:00:00Z"
+        },
+        {
+            "id": 2,
+            "roomId": "public",
+            "userId": 3,
+            "message": "d",
+            "timestamp": "2024-11-15T21:13:37.049205"
+        },
+        {
+            "id": 3,
+            "roomId": "public",
+            "userId": 2,
+            "message": "boo",
+            "timestamp": "2024-11-15T21:14:05.561454"
+        },
+        {
+            "id": 4,
+            "roomId": "public",
+            "userId": 3,
+            "message": "a",
+            "timestamp": "2024-11-15T21:57:05.811327"
+        }
+    ],
+    "polls": [
+        {
+            "id": 1,
+            "title": "Sample Poll",
+            "options": [
+                "Option 1",
+                "Option 2"
+            ],
+            "votes": {
+                "Option 1": 2,
+                "Option 2": 0
+            },
+            "voters": [
+                3,
+                2
+            ],
+            "active": true
+        },
+        {
+            "id": 2,
+            "title": "ilabu",
+            "options": [
+                "y",
+                "n"
+            ],
+            "votes": {
+                "y": 1,
+                "n": 1
+            },
+            "active": true,
+            "voters": [
+                2,
+                3
+            ]
+        },
+        {
+            "id": 3,
+            "title": "s",
+            "options": [
+                "s",
+                "s"
+            ],
+            "votes": {
+                "s": 1
+            },
+            "active": true,
+            "voters": [
+                3
+            ]
+        },
+        {
+            "id": 4,
+            "title": "c",
+            "options": [
+                "1",
+                "2"
+            ],
+            "votes": {
+                "1": 1,
+                "2": 0
+            },
+            "active": true,
+            "voters": [
+                3
+            ]
+        }
+    ]
+}
