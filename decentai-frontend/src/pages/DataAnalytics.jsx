@@ -9,6 +9,7 @@ function DataAnalytics() {
   const [data, setData] = useState({
     transactions: [],
     polls: [],
+    chats: [],
     loading: true,
     error: null
   });
@@ -24,15 +25,17 @@ function DataAnalytics() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [users, transactions, polls] = await Promise.all([
+      const [users, transactions, polls, chats] = await Promise.all([
         fetch('http://localhost:5000/users').then(res => res.json()),
         fetch('http://localhost:5000/transactions').then(res => res.json()),
-        fetch('http://localhost:5000/polls').then(res => res.json())
+        fetch('http://localhost:5000/polls').then(res => res.json()),
+        fetch('http://localhost:5000/chats').then(res => res.json())
       ]);
 
       setData({
         transactions,
         polls,
+        chats,
         loading: false,
         error: null
       });
@@ -47,6 +50,7 @@ function DataAnalytics() {
       setData({
         transactions: [],
         polls: [],
+        chats: [],
         loading: false,
         error: 'Failed to load analytics data'
       });
@@ -189,6 +193,40 @@ function DataAnalytics() {
           <h2 className="text-lg font-semibold mb-4">Average Transaction Amount</h2>
           <p className="text-2xl">{processedData?.averageTransactionAmount}</p>
         </div>
+      </div>
+
+      <div className="bg-white p-6 rounded-lg shadow mt-6">
+        <h2 className="text-lg font-semibold mb-4">Chat Messages</h2>
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead>
+            <tr>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                User ID
+              </th>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Message
+              </th>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Timestamp
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {data.chats.map((chat) => (
+              <tr key={chat.id}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {chat.userId}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {chat.message}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {new Date(chat.timestamp).toLocaleString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

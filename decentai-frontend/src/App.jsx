@@ -6,7 +6,6 @@ import Dashboard from './pages/Dashboard';
 import Points from './pages/Points';
 import Chat from './pages/Chat';
 import Polls from './pages/Polls';
-import Profile from './pages/Profile';
 import AIChat from './pages/AIChat';
 import UserManagement from './pages/admin/UserManagement';
 import DataAnalytics from './pages/DataAnalytics';
@@ -54,12 +53,6 @@ function App() {
           <Route path="/polls" element={
             <ProtectedRoute>
               <Polls />
-            </ProtectedRoute>
-          } />
-
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <Profile />
             </ProtectedRoute>
           } />
 

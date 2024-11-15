@@ -47,6 +47,13 @@
             "userId": 2,
             "message": "boo",
             "timestamp": "2024-11-15T21:14:05.561454"
+        },
+        {
+            "id": 4,
+            "roomId": "public",
+            "userId": 3,
+            "message": "a",
+            "timestamp": "2024-11-15T21:57:05.811327"
         }
     ],
     "polls": [
@@ -93,6 +100,22 @@
             ],
             "votes": {
                 "s": 1
+            },
+            "active": true,
+            "voters": [
+                3
+            ]
+        },
+        {
+            "id": 4,
+            "title": "c",
+            "options": [
+                "1",
+                "2"
+            ],
+            "votes": {
+                "1": 1,
+                "2": 0
             },
             "active": true,
             "voters": [
