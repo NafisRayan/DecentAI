@@ -6,11 +6,11 @@ import {
   ChatBubbleLeftIcon,
   ChartBarIcon,
   UserIcon,
-  CogIcon,
-  SparklesIcon
+  SparklesIcon,
+  CogIcon
 } from '@heroicons/react/24/outline';
 
-const Sidebar = ({ isAdmin }) => {
+const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
 
   const navigation = [
@@ -19,14 +19,12 @@ const Sidebar = ({ isAdmin }) => {
     { name: 'Chat', icon: ChatBubbleLeftIcon, path: '/chat' },
     { name: 'AI Chat', icon: SparklesIcon, path: '/ai-chat' },
     { name: 'Polls', icon: ChartBarIcon, path: '/polls' },
+    { name: 'Statistics', icon: ChartBarIcon, path: '/statistics' },
+    // { name: 'Community', icon: UserIcon, path: '/community' },
+    { name: 'Analytics', icon: ChartBarIcon, path: '/analytics' },
     { name: 'Profile', icon: UserIcon, path: '/profile' },
-  ];
-
-  const adminNavigation = [
-    { name: 'Admin Dashboard', icon: HomeIcon, path: '/admin' },
-    { name: 'User Management', icon: UserIcon, path: '/admin/users' },
-    { name: 'Settings', icon: CogIcon, path: '/admin/settings' },
-    { name: 'Data Analysis', icon: ChartBarIcon, path: '/admin/analysis' },
+    { name: 'Settings', icon: CogIcon, path: '/user-settings' },
+    
   ];
 
   return (
@@ -38,7 +36,7 @@ const Sidebar = ({ isAdmin }) => {
       </div>
       
       <nav className="mt-8">
-        {(isAdmin ? [...navigation, ...adminNavigation] : navigation).map((item) => (
+        {navigation.map((item) => (
           <NavLink
             key={item.name}
             to={item.path}

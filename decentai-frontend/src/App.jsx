@@ -7,11 +7,12 @@ import Points from './pages/Points';
 import Chat from './pages/Chat';
 import Polls from './pages/Polls';
 import Profile from './pages/Profile';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import UserManagement from './pages/admin/UserManagement';
-import Settings from './pages/admin/Settings';
 import AIChat from './pages/AIChat';
-import DataAnalysis from './pages/admin/DataAnalysis';
+import UserManagement from './pages/admin/UserManagement';
+import Statistics from './pages/Statistics';
+// import Community from './pages/Community';
+import UserSettings from './pages/UserSettings';
+import Analytics from './pages/Analytics';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -24,7 +25,7 @@ function ProtectedRoute({ children }) {
     return <Navigate to="/auth" />;
   }
   
-  return children;
+  return <Layout>{children}</Layout>;
 }
 
 function App() {
@@ -36,29 +37,69 @@ function App() {
           
           <Route path="/" element={
             <ProtectedRoute>
-              <Layout>
-                <Dashboard />
-              </Layout>
+              <Dashboard />
             </ProtectedRoute>
           } />
           
           <Route path="/points" element={
             <ProtectedRoute>
-              <Layout>
-                <Points />
-              </Layout>
+              <Points />
             </ProtectedRoute>
           } />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/polls" element={<Polls />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/ai-chat" element={<AIChat />} />
-          
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/users" element={<UserManagement />} />
-          <Route path="/admin/settings" element={<Settings />} />
-          <Route path="/admin/analysis" element={<DataAnalysis />} />
+
+          <Route path="/chat" element={
+            <ProtectedRoute>
+              <Chat />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/polls" element={
+            <ProtectedRoute>
+              <Polls />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/ai-chat" element={
+            <ProtectedRoute>
+              <AIChat />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/user-management" element={
+            <ProtectedRoute>
+              <UserManagement />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/statistics" element={
+            <ProtectedRoute>
+              <Statistics />
+            </ProtectedRoute>
+          } />
+
+          {/* <Route path="/community" element={
+            <ProtectedRoute>
+              <Community />
+            </ProtectedRoute>
+          } /> */}
+
+          <Route path="/user-settings" element={
+            <ProtectedRoute>
+              <UserSettings />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/analytics" element={
+            <ProtectedRoute>
+              <Analytics />
+            </ProtectedRoute>
+          } />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
