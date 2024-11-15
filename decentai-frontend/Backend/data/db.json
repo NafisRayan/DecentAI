@@ -1,0 +1,55 @@
+{
+    "users": [
+        {
+            "id": 1,
+            "username": "vau",
+            "email": "demo@example.com",
+            "password": "123",
+            "points": 1000,
+            "avatar": "/default-avatar.png"
+        },
+        {
+            "username": "vau2",
+            "email": "nafisrayan123@gmail.com",
+            "password": "scrypt:32768:8:1$VK0CsN2h4HDqDjdr$c6ad59cf89193b7f88634dcd22f0fc69d8b42d29a0fbc11134833cbc99bc1c5f6e0d1d790663c7b2c1dc461b47bc55d39f8bb128afe59f819bab2c578a90f91f",
+            "id": 2,
+            "points": 0,
+            "avatar": "/default-avatar.png"
+        }
+    ],
+    "transactions": [
+        {
+            "id": 1,
+            "senderId": 1,
+            "receiverId": 2,
+            "amount": 100,
+            "timestamp": "2024-03-20T10:00:00Z"
+        }
+    ],
+    "chats": [
+        {
+            "id": 1,
+            "roomId": "public",
+            "userId": 2,
+            "message": "Hello everyone!",
+            "timestamp": "2024-03-20T09:00:00Z"
+        }
+    ],
+    "polls": [
+        {
+            "id": 1,
+            "title": "What feature should we build next?",
+            "options": [
+                "Chat",
+                "Marketplace",
+                "Games"
+            ],
+            "votes": {
+                "Chat": 5,
+                "Marketplace": 3,
+                "Games": 2
+            },
+            "active": true
+        }
+    ]
+}

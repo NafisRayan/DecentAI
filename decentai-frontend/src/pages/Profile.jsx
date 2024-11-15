@@ -1,27 +1,34 @@
-import { useState, useEffect } from 'react';
-import demoData from '../data/db.json';
+import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 function Profile() {
-  const [user, setUser] = useState(null);
+  const { user, setUser } = useAuth();
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
+    username: user?.username || '',
+    email: user?.email || '',
   });
 
-  useEffect(() => {
-    const userData = demoData.users[0];
-    setUser(userData);
-    setFormData({
-      username: userData.username,
-      email: userData.email,
-    });
-  }, []);
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setUser({ ...user, ...formData });
-    setEditing(false);
+    try {
+      const response = await fetch(`http://localhost:5000/users/${user.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        const updatedUser = await response.json();
+        setUser(updatedUser);
+        setEditing(false);
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
   };
 
   return (

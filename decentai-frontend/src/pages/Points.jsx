@@ -1,32 +1,55 @@
 import { useState, useEffect } from 'react';
-import demoData from '../data/db.json';
+import { useAuth } from '../contexts/AuthContext';
 
 function Points() {
-  const [balance, setBalance] = useState(0);
+  const { user } = useAuth();
   const [transactions, setTransactions] = useState([]);
   const [recipientId, setRecipientId] = useState('');
   const [amount, setAmount] = useState('');
+  const balance = user?.points || 0;
 
   useEffect(() => {
-    setBalance(demoData.users[0].points);
-    setTransactions(demoData.transactions);
+    const fetchTransactions = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/transactions');
+        const data = await response.json();
+        setTransactions(data);
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+      }
+    };
+
+    fetchTransactions();
   }, []);
 
-  const handleTransfer = (e) => {
+  const handleTransfer = async (e) => {
     e.preventDefault();
-    // Simulate transfer
-    const newTransaction = {
-      id: transactions.length + 1,
-      senderId: 1,
-      receiverId: parseInt(recipientId),
-      amount: parseInt(amount),
-      timestamp: new Date().toISOString()
-    };
-    
-    setTransactions([newTransaction, ...transactions]);
-    setBalance(prev => prev - parseInt(amount));
-    setRecipientId('');
-    setAmount('');
+    try {
+      const response = await fetch('http://localhost:5000/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          senderId: user.id,
+          receiverId: parseInt(recipientId),
+          amount: parseInt(amount),
+          timestamp: new Date().toISOString()
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh transactions after successful transfer
+        const updatedTransactions = await response.json();
+        setTransactions(updatedTransactions);
+        // Reset form
+        setRecipientId('');
+        setAmount('');
+      }
+    } catch (error) {
+      console.error('Error making transfer:', error);
+    }
   };
 
   return (

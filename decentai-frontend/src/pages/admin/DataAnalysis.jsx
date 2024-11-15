@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import demoData from '../../data/db.json';
 import {
   BarChart,
   Bar,
@@ -14,31 +13,30 @@ import {
 } from 'recharts';
 
 function DataAnalysis() {
-  const [pollData, setPollData] = useState([]);
-  const [transactionStats, setTransactionStats] = useState({
-    totalAmount: 0,
-    averageAmount: 0,
-    transactionCount: 0
+  const [data, setData] = useState({
+    users: [],
+    transactions: [],
+    polls: []
   });
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
   useEffect(() => {
-    // Transform poll data for visualization
-    const formattedPollData = demoData.polls[0].options.map(option => ({
-      name: option,
-      votes: demoData.polls[0].votes[option] || 0
-    }));
-    setPollData(formattedPollData);
+    const fetchData = async () => {
+      try {
+        const [users, transactions, polls] = await Promise.all([
+          fetch('http://localhost:5000/users').then(res => res.json()),
+          fetch('http://localhost:5000/transactions').then(res => res.json()),
+          fetch('http://localhost:5000/polls').then(res => res.json())
+        ]);
 
-    // Calculate transaction statistics
-    const transactions = demoData.transactions;
-    const totalAmount = transactions.reduce((sum, tx) => sum + tx.amount, 0);
-    setTransactionStats({
-      totalAmount,
-      averageAmount: totalAmount / transactions.length,
-      transactionCount: transactions.length
-    });
+        setData({ users, transactions, polls });
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
   }, []);
 
   return (
@@ -48,19 +46,19 @@ function DataAnalysis() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-gray-500 text-sm">Total Transaction Amount</h3>
-          <p className="text-2xl font-bold">{transactionStats.totalAmount}</p>
+          <p className="text-2xl font-bold">{data.transactions.reduce((sum, tx) => sum + tx.amount, 0)}</p>
         </div>
         
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-gray-500 text-sm">Average Transaction</h3>
           <p className="text-2xl font-bold">
-            {transactionStats.averageAmount.toFixed(2)}
+            {data.transactions.reduce((sum, tx) => sum + tx.amount, 0) / data.transactions.length}
           </p>
         </div>
         
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-gray-500 text-sm">Transaction Count</h3>
-          <p className="text-2xl font-bold">{transactionStats.transactionCount}</p>
+          <p className="text-2xl font-bold">{data.transactions.length}</p>
         </div>
       </div>
 
@@ -70,7 +68,10 @@ function DataAnalysis() {
           <div className="flex justify-center">
             <PieChart width={300} height={300}>
               <Pie
-                data={pollData}
+                data={data.polls[0].options.map(option => ({
+                  name: option,
+                  votes: data.polls[0].votes[option] || 0
+                }))}
                 cx={150}
                 cy={150}
                 labelLine={false}
@@ -79,7 +80,7 @@ function DataAnalysis() {
                 fill="#8884d8"
                 dataKey="votes"
               >
-                {pollData.map((entry, index) => (
+                {data.polls[0].options.map((option, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
@@ -90,7 +91,10 @@ function DataAnalysis() {
 
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-lg font-semibold mb-4">Vote Distribution</h2>
-          <BarChart width={400} height={300} data={pollData}>
+          <BarChart width={400} height={300} data={data.polls[0].options.map(option => ({
+            name: option,
+            votes: data.polls[0].votes[option] || 0
+          }))}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />

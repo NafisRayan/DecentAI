@@ -1,14 +1,25 @@
 import { useState, useEffect, useRef } from 'react';
-import demoData from '../data/db.json';
 import { FaMicrophone, FaVolumeUp } from 'react-icons/fa';
+import { useAuth } from '../contexts/AuthContext';
 
 function Chat() {
+  const { user } = useAuth();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    setMessages(demoData.chats);
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/chats');
+        const data = await response.json();
+        setMessages(data);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    };
+
+    fetchMessages();
   }, []);
 
   useEffect(() => {

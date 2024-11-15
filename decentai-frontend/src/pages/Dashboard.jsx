@@ -1,14 +1,23 @@
 import { useState, useEffect } from 'react';
-import demoData from '../data/db.json';
+import { useAuth } from '../contexts/AuthContext';
 
 function Dashboard() {
-  const [userData, setUserData] = useState(null);
+  const { user } = useAuth();
   const [recentTransactions, setRecentTransactions] = useState([]);
 
   useEffect(() => {
-    // Simulate API call with demo data
-    setUserData(demoData.users[0]);
-    setRecentTransactions(demoData.transactions.slice(0, 5));
+    // Use the authenticated user data instead of demo data
+    const fetchTransactions = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/transactions');
+        const data = await response.json();
+        setRecentTransactions(data.slice(0, 5));
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+      }
+    };
+
+    fetchTransactions();
   }, []);
 
   return (
@@ -20,7 +29,7 @@ function Dashboard() {
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-lg font-semibold mb-2">Current Points</h2>
           <p className="text-3xl font-bold text-primary">
-            {userData?.points || 0}
+            {user?.points || 0}
           </p>
         </div>
 

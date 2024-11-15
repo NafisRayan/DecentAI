@@ -1,4 +1,6 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import LoginRegister from './pages/Auth/LoginRegister';
 import Layout from './components/Layout/Layout';
 import Dashboard from './pages/Dashboard';
 import Points from './pages/Points';
@@ -11,16 +13,42 @@ import Settings from './pages/admin/Settings';
 import AIChat from './pages/AIChat';
 import DataAnalysis from './pages/admin/DataAnalysis';
 
-function App() {
-  // In a real app, this would come from authentication
-  const isAdmin = true; 
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+  
+  if (!user) {
+    return <Navigate to="/auth" />;
+  }
+  
+  return children;
+}
 
+function App() {
   return (
-    <BrowserRouter>
-      <Layout isAdmin={isAdmin}>
+    <AuthProvider>
+      <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/points" element={<Points />} />
+          <Route path="/auth" element={<LoginRegister />} />
+          
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Layout>
+                <Dashboard />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/points" element={
+            <ProtectedRoute>
+              <Layout>
+                <Points />
+              </Layout>
+            </ProtectedRoute>
+          } />
           <Route path="/chat" element={<Chat />} />
           <Route path="/polls" element={<Polls />} />
           <Route path="/profile" element={<Profile />} />
@@ -32,8 +60,8 @@ function App() {
           <Route path="/admin/settings" element={<Settings />} />
           <Route path="/admin/analysis" element={<DataAnalysis />} />
         </Routes>
-      </Layout>
-    </BrowserRouter>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

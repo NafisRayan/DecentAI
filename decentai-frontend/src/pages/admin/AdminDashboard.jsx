@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import demoData from '../../data/db.json';
 
 function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -10,12 +9,26 @@ function AdminDashboard() {
   });
 
   useEffect(() => {
-    setStats({
-      totalUsers: demoData.users.length,
-      totalTransactions: demoData.transactions.length,
-      totalPolls: demoData.polls.length,
-      activePolls: demoData.polls.filter(poll => poll.active).length,
-    });
+    const fetchStats = async () => {
+      try {
+        const [users, transactions, polls] = await Promise.all([
+          fetch('http://localhost:5000/users').then(res => res.json()),
+          fetch('http://localhost:5000/transactions').then(res => res.json()),
+          fetch('http://localhost:5000/polls').then(res => res.json())
+        ]);
+
+        setStats({
+          totalUsers: users.length,
+          totalTransactions: transactions.length,
+          totalPolls: polls.length,
+          activePolls: polls.filter(poll => poll.active).length,
+        });
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      }
+    };
+
+    fetchStats();
   }, []);
 
   return (
