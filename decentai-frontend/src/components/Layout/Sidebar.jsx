@@ -6,7 +6,8 @@ import {
   ChatBubbleLeftIcon,
   ChartBarIcon,
   UserIcon,
-  CogIcon
+  CogIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline';
 
 const Sidebar = ({ isAdmin }) => {
@@ -18,6 +19,7 @@ const Sidebar = ({ isAdmin }) => {
     { name: 'Chat', icon: ChatBubbleLeftIcon, path: '/chat' },
     { name: 'Polls', icon: ChartBarIcon, path: '/polls' },
     { name: 'Profile', icon: UserIcon, path: '/profile' },
+    { name: 'AI Chat', icon: SparklesIcon, path: '/ai-chat' },
   ];
 
   const adminNavigation = [
@@ -30,7 +32,7 @@ const Sidebar = ({ isAdmin }) => {
     <div className={`bg-gray-800 text-white h-screen transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}>
       <div className="p-4">
         <button onClick={() => setCollapsed(!collapsed)} className="w-full text-center">
-          {collapsed ? '→' : '←'}
+          {collapsed ? '☰' : '☰ Menu'}
         </button>
       </div>
       

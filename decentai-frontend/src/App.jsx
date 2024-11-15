@@ -8,6 +8,7 @@ import Profile from './pages/Profile';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserManagement from './pages/admin/UserManagement';
 import Settings from './pages/admin/Settings';
+import AIChat from './pages/AIChat';
 
 function App() {
   // In a real app, this would come from authentication
@@ -22,6 +23,7 @@ function App() {
           <Route path="/chat" element={<Chat />} />
           <Route path="/polls" element={<Polls />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/ai-chat" element={<AIChat />} />
           
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminDashboard />} />
