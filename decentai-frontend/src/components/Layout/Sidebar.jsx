@@ -26,6 +26,7 @@ const Sidebar = ({ isAdmin }) => {
     { name: 'Admin Dashboard', icon: HomeIcon, path: '/admin' },
     { name: 'User Management', icon: UserIcon, path: '/admin/users' },
     { name: 'Settings', icon: CogIcon, path: '/admin/settings' },
+    { name: 'Data Analysis', icon: ChartBarIcon, path: '/admin/analysis' },
   ];
 
   return (

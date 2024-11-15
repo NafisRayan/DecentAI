@@ -9,6 +9,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import UserManagement from './pages/admin/UserManagement';
 import Settings from './pages/admin/Settings';
 import AIChat from './pages/AIChat';
+import DataAnalysis from './pages/admin/DataAnalysis';
 
 function App() {
   // In a real app, this would come from authentication
@@ -29,6 +30,7 @@ function App() {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/users" element={<UserManagement />} />
           <Route path="/admin/settings" element={<Settings />} />
+          <Route path="/admin/analysis" element={<DataAnalysis />} />
         </Routes>
       </Layout>
     </BrowserRouter>
