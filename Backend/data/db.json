@@ -117,6 +117,13 @@
             "userId": 3,
             "message": "a",
             "timestamp": "2024-11-15T21:57:05.811327"
+        },
+        {
+            "id": 5,
+            "roomId": "public",
+            "userId": 3,
+            "message": "BYE BYE",
+            "timestamp": "2024-11-16T22:35:44.559951"
         }
     ],
     "polls": [
@@ -183,6 +190,25 @@
             "active": true,
             "voters": [
                 3
+            ]
+        },
+        {
+            "id": 5,
+            "title": "Nafis",
+            "options": [
+                "Rayan",
+                "21",
+                "30"
+            ],
+            "votes": {
+                "Rayan": 1,
+                "21": 1,
+                "30": 0
+            },
+            "active": true,
+            "voters": [
+                3,
+                2
             ]
         }
     ],

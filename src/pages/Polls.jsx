@@ -104,16 +104,83 @@ function Polls() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Polls</h1>
         <button
-          onClick={() => setShowCreateModal(true)}
+          onClick={() => setShowCreateModal(!showCreateModal)}
           className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90"
         >
-          Create Poll
+          {showCreateModal ? 'Cancel' : 'Create Poll'}
         </button>
       </div>
 
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
+        </div>
+      )}
+
+      {showCreateModal && (
+        <div className="bg-white p-6 rounded-lg shadow mb-6">
+          <h2 className="text-lg font-semibold mb-4">Create New Poll</h2>
+          <form onSubmit={handleCreatePoll}>
+            <input
+              type="text"
+              value={newPoll.title}
+              onChange={(e) => setNewPoll(prev => ({ ...prev, title: e.target.value }))}
+              placeholder="Poll Question"
+              className="w-full p-2 border rounded mb-4"
+            />
+            
+            <div className="space-y-2 mb-4">
+              {newPoll.options.map((option, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={option}
+                    onChange={(e) => setNewPoll(prev => ({
+                      ...prev,
+                      options: prev.options.map((opt, i) => i === index ? e.target.value : opt)
+                    }))}
+                    placeholder={`Option ${index + 1}`}
+                    className="flex-1 p-2 border rounded"
+                  />
+                  {index > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => setNewPoll(prev => ({
+                        ...prev,
+                        options: prev.options.filter((_, i) => i !== index)
+                      }))}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            
+            {newPoll.options.length < 6 && (
+              <button
+                type="button"
+                onClick={() => setNewPoll(prev => ({
+                  ...prev,
+                  options: [...prev.options, '']
+                }))}
+                className="flex items-center gap-1 text-primary hover:text-primary/80 mb-4"
+              >
+                <span className="text-xl">+</span>
+                <span>Add Option</span>
+              </button>
+            )}
+            
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+              >
+                Create Poll
+              </button>
+            </div>
+          </form>
         </div>
       )}
 
@@ -160,65 +227,6 @@ function Polls() {
           </div>
         ))}
       </div>
-
-      {/* Create Poll Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md">
-            <h2 className="text-lg font-semibold mb-4">Create New Poll</h2>
-            <form onSubmit={handleCreatePoll}>
-              <input
-                type="text"
-                value={newPoll.title}
-                onChange={(e) => setNewPoll(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Poll Question"
-                className="w-full p-2 border rounded mb-4"
-              />
-              
-              {newPoll.options.map((option, index) => (
-                <input
-                  key={index}
-                  type="text"
-                  value={option}
-                  onChange={(e) => setNewPoll(prev => ({
-                    ...prev,
-                    options: prev.options.map((opt, i) => i === index ? e.target.value : opt)
-                  }))}
-                  placeholder={`Option ${index + 1}`}
-                  className="w-full p-2 border rounded mb-2"
-                />
-              ))}
-              
-              <button
-                type="button"
-                onClick={() => setNewPoll(prev => ({
-                  ...prev,
-                  options: [...prev.options, '']
-                }))}
-                className="text-primary hover:underline mb-4 block"
-              >
-                + Add Option
-              </button>
-              
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 border rounded hover:bg-gray-100"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
-                >
-                  Create
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -29,7 +29,7 @@ const Sidebar = () => {
     <div className={`bg-gray-800 text-white h-screen transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}>
       <div className="p-4">
         <button onClick={() => setCollapsed(!collapsed)} className="w-full text-center">
-          {collapsed ? '☰' : '☰ Menu'}
+          {collapsed ? '☰' : '☰ DecentAI'}
         </button>
       </div>
       
