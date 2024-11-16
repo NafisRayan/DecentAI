@@ -20,6 +20,7 @@ const Sidebar = () => {
     { name: 'AI Chat', icon: SparklesIcon, path: '/ai-chat' },
     { name: 'Polls', icon: ChartBarIcon, path: '/polls' },
     { name: 'Data Analytics', icon: ChartBarIcon, path: '/data-analytics' },
+    { name: 'Sentiment Analysis', icon: ChartBarIcon, path: '/sentiment-analysis' },
     { name: 'Settings', icon: CogIcon, path: '/user-settings' },
     
   ];
