@@ -13,9 +13,17 @@ function Points() {
       try {
         const response = await fetch('http://localhost:5000/transactions');
         const data = await response.json();
-        setTransactions(data);
+        console.log('Fetched transactions:', data);
+
+        if (Array.isArray(data)) {
+          setTransactions(data.reverse());
+        } else {
+          console.error('Expected an array but got:', data);
+          setTransactions([]);
+        }
       } catch (error) {
         console.error('Error fetching transactions:', error);
+        setTransactions([]);
       }
     };
 
@@ -42,7 +50,7 @@ function Points() {
       if (response.ok) {
         // Refresh transactions after successful transfer
         const updatedTransactions = await response.json();
-        setTransactions(updatedTransactions);
+        setTransactions(Array.isArray(updatedTransactions) ? updatedTransactions : []);
         // Reset form
         setRecipientId('');
         setAmount('');
@@ -69,6 +77,7 @@ function Points() {
                 onChange={(e) => setRecipientId(e.target.value)}
                 className="w-full p-2 border rounded"
                 required
+                min="0"
               />
             </div>
             <div>
@@ -80,6 +89,7 @@ function Points() {
                 className="w-full p-2 border rounded"
                 max={balance}
                 required
+                min="0"
               />
             </div>
             <button
@@ -99,8 +109,8 @@ function Points() {
               <div key={transaction.id} className="flex justify-between items-center border-b pb-2">
                 <div>
                   <p className="font-medium">
-                    {transaction.senderId === 1 ? 'Sent to' : 'Received from'} User #{
-                      transaction.senderId === 1 ? transaction.receiverId : transaction.senderId
+                    {transaction.receiverId === user.id ? 'Received from' : 'Sent to'} User #{
+                      transaction.receiverId === user.id ? transaction.senderId : transaction.receiverId
                     }
                   </p>
                   <p className="text-sm text-gray-500">
@@ -108,9 +118,9 @@ function Points() {
                   </p>
                 </div>
                 <span className={`font-semibold ${
-                  transaction.senderId === 1 ? 'text-red-500' : 'text-green-500'
+                  transaction.receiverId === user.id ? 'text-green-500' : 'text-red-500'
                 }`}>
-                  {transaction.senderId === 1 ? '-' : '+'}{transaction.amount}
+                  {transaction.receiverId === user.id ? '+' : '-'}{transaction.amount}
                 </span>
               </div>
             ))}
