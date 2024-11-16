@@ -9,6 +9,7 @@ import Polls from './pages/Polls';
 import AIChat from './pages/AIChat';
 import DataAnalytics from './pages/DataAnalytics';
 import UserSettings from './pages/UserSettings';
+import SentimentAnalysis from './pages/SentimentAnalysis';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -70,6 +71,12 @@ function App() {
           <Route path="/user-settings" element={
             <ProtectedRoute>
               <UserSettings />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/sentiment-analysis" element={
+            <ProtectedRoute>
+              <SentimentAnalysis />
             </ProtectedRoute>
           } />
         </Routes>
