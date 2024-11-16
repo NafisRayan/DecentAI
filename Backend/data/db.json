@@ -122,5 +122,23 @@
                 3
             ]
         }
+    ],
+    "analysisHistory": [
+        {
+            "id": 1,
+            "text": "i love you",
+            "sentiment": "positive",
+            "confidence": 0.3132438320605379,
+            "score": 10812.300000000001,
+            "timestamp": "2024-11-16T21:29:32.480Z"
+        },
+        {
+            "id": 2,
+            "text": "i hate you",
+            "sentiment": "negative",
+            "confidence": 0.3397426365810441,
+            "score": 10967.300000000001,
+            "timestamp": "2024-11-16T21:29:42.520Z"
+        }
     ]
 }

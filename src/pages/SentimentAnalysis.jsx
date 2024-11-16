@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import wink from 'wink-nlp';
 import model from 'wink-eng-lite-web-model';
 import modelArtifacts from '../contexts/model_artifacts.json';
@@ -12,6 +12,34 @@ function SentimentAnalysis() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Fetch analysis history from the backend
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/analysis-history');
+        if (!response.ok) throw new Error('Failed to fetch analysis history');
+        const data = await response.json();
+        setHistory(data);
+      } catch (error) {
+        console.error('Error fetching analysis history:', error);
+      }
+    };
+
+    fetchHistory();
+  }, []);
+
+  const handleClearHistory = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/analysis-history', {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to clear analysis history');
+      setHistory([]); // Clear the history in the state
+    } catch (error) {
+      console.error('Error clearing analysis history:', error);
+    }
+  };
 
   // Memoize the vocabulary and sentiment scores
   const vocabulary = useMemo(() => new Map(modelArtifacts.vocabulary), []);
@@ -61,7 +89,7 @@ function SentimentAnalysis() {
     };
   };
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     if (!inputText.trim()) return;
     
     setLoading(true);
@@ -82,6 +110,15 @@ function SentimentAnalysis() {
       setSentiment(result);
       setHistory(prev => [newAnalysis, ...prev]);
       setInputText('');
+
+      // Send the analysis to the backend
+      await fetch('http://localhost:5000/analysis-history', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newAnalysis)
+      });
     } catch (error) {
       setError('Failed to analyze sentiment');
       console.error('Error analyzing sentiment:', error);
@@ -137,7 +174,15 @@ function SentimentAnalysis() {
 
         {/* Analysis History */}
         <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4">Analysis History</h2>
+          <div className="flex justify-between mb-4">
+            <h2 className="text-lg font-semibold">Analysis History</h2>
+            <button
+              onClick={handleClearHistory}
+              className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
+            >
+              ↻
+            </button>
+          </div>
           <div className="space-y-4">
             {history.map((item) => (
               <div 

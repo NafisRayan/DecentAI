@@ -240,5 +240,49 @@ def create_message():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/analysis-history', methods=['POST'])
+def save_analysis_history():
+    try:
+        data = load_data()
+        analysis = request.json
+        
+        # Ensure the 'analysisHistory' key exists in the data
+        if 'analysisHistory' not in data:
+            data['analysisHistory'] = []
+        
+        # Add a new analysis entry
+        analysis_id = max((a['id'] for a in data['analysisHistory']), default=0) + 1
+        new_analysis = {
+            'id': analysis_id,
+            'text': analysis['text'],
+            'sentiment': analysis['sentiment'],
+            'confidence': analysis['confidence'],
+            'score': analysis['score'],
+            'timestamp': analysis['timestamp']
+        }
+        data['analysisHistory'].append(new_analysis)
+        save_data(data)
+        return jsonify(new_analysis), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/analysis-history', methods=['GET'])
+def get_analysis_history():
+    try:
+        data = load_data()
+        return jsonify(data.get('analysisHistory', []))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/analysis-history', methods=['DELETE'])
+def clear_analysis_history():
+    try:
+        data = load_data()
+        data['analysisHistory'] = []  # Clear the analysis history
+        save_data(data)
+        return jsonify({'message': 'Analysis history cleared'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000) 
