@@ -38,6 +38,7 @@ def get_users():
 @app.route('/transactions', methods=['GET'])
 def get_transactions():
     data = load_data()
+    print('Transactions data:', data['transactions'])
     return jsonify(data['transactions'])
 
 @app.route('/chats', methods=['GET'])

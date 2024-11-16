@@ -17,7 +17,7 @@ function Dashboard() {
       try {
         const response = await fetch('http://localhost:5000/transactions');
         const data = await response.json();
-        setRecentTransactions(data.slice(0, 5));
+        setRecentTransactions(data.slice(-5).reverse());
       } catch (error) {
         setError('Failed to fetch transactions. Please try again later.');
       } finally {
@@ -84,7 +84,11 @@ function Dashboard() {
             <div className="space-y-4">
               {recentTransactions.map((transaction) => (
                 <div key={transaction.id} className="flex justify-between items-center">
-                  <span>Transfer to User #{transaction.receiverId}</span>
+                  <span>
+                    {transaction.receiverId === user.id 
+                      ? `Transferred from User #${transaction.senderId}` 
+                      : `Sent to User #${transaction.receiverId}`}
+                  </span>
                   <span className="font-semibold">{transaction.amount} points</span>
                 </div>
               ))}

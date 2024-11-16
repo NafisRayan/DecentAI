@@ -5,7 +5,7 @@
             "email": "nafisrayan123@gmail.com",
             "password": "scrypt:32768:8:1$VK0CsN2h4HDqDjdr$c6ad59cf89193b7f88634dcd22f0fc69d8b42d29a0fbc11134833cbc99bc1c5f6e0d1d790663c7b2c1dc461b47bc55d39f8bb128afe59f819bab2c578a90f91f",
             "id": 2,
-            "points": 0,
+            "points": 20,
             "avatar": "/default-avatar.png"
         },
         {
@@ -13,7 +13,7 @@
             "email": "d@gmail.com",
             "password": "scrypt:32768:8:1$9aouQx53s8ZK9gmX$4ca224fbf74c938912902179d3130f8be01f862b9c778fc1d30f30f427b4e7f1ec752b5350eefc5650196c1042ce442e5a558eb9c235d86758aa2226e10c6867",
             "id": 3,
-            "points": 0,
+            "points": 100,
             "avatar": "/default-avatar.png"
         }
     ],
@@ -24,6 +24,69 @@
             "receiverId": 2,
             "amount": 100,
             "timestamp": "2024-03-20T10:00:00Z"
+        },
+        {
+            "id": 2,
+            "senderId": 3,
+            "receiverId": 2,
+            "amount": 20,
+            "timestamp": "2024-11-16T21:37:10.138753"
+        },
+        {
+            "id": 3,
+            "senderId": 3,
+            "receiverId": 2,
+            "amount": 10,
+            "timestamp": "2024-11-16T21:46:32.583949"
+        },
+        {
+            "id": 4,
+            "senderId": 3,
+            "receiverId": 2,
+            "amount": 10,
+            "timestamp": "2024-11-16T21:48:06.811141"
+        },
+        {
+            "id": 5,
+            "senderId": 3,
+            "receiverId": 2,
+            "amount": 1,
+            "timestamp": "2024-11-16T21:49:04.701778"
+        },
+        {
+            "id": 6,
+            "senderId": 3,
+            "receiverId": 2,
+            "amount": 1,
+            "timestamp": "2024-11-16T21:49:45.910274"
+        },
+        {
+            "id": 7,
+            "senderId": 3,
+            "receiverId": 2,
+            "amount": 1,
+            "timestamp": "2024-11-16T21:50:08.917815"
+        },
+        {
+            "id": 8,
+            "senderId": 3,
+            "receiverId": 2,
+            "amount": 1,
+            "timestamp": "2024-11-16T21:50:52.741710"
+        },
+        {
+            "id": 9,
+            "senderId": 3,
+            "receiverId": 2,
+            "amount": 10,
+            "timestamp": "2024-11-16T21:52:34.742738"
+        },
+        {
+            "id": 10,
+            "senderId": 2,
+            "receiverId": 3,
+            "amount": 10,
+            "timestamp": "2024-11-16T21:59:26.883384"
         }
     ],
     "chats": [
