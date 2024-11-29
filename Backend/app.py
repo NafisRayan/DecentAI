@@ -37,9 +37,23 @@ def get_users():
 
 @app.route('/transactions', methods=['GET'])
 def get_transactions():
-    data = load_data()
-    print('Transactions data:', data['transactions'])
-    return jsonify(data['transactions'])
+    try:
+        user_id = request.args.get('userId')
+        if not user_id:
+            return jsonify({'error': 'userId is required'}), 400
+            
+        user_id = int(user_id)
+        data = load_data()
+        
+        # Filter transactions where user is either sender or receiver
+        user_transactions = [
+            t for t in data['transactions'] 
+            if t['senderId'] == user_id or t['receiverId'] == user_id
+        ]
+        
+        return jsonify(user_transactions)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/chats', methods=['GET'])
 def get_chats():
@@ -282,6 +296,15 @@ def clear_analysis_history():
         data['analysisHistory'] = []  # Clear the analysis history
         save_data(data)
         return jsonify({'message': 'Analysis history cleared'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Add this new route for analytics
+@app.route('/analytics/transactions', methods=['GET'])
+def get_all_transactions():
+    try:
+        data = load_data()
+        return jsonify(data['transactions'])
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
