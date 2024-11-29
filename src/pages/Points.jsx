@@ -11,10 +11,9 @@ function Points() {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const response = await fetch('http://localhost:5000/transactions');
+        const response = await fetch(`http://localhost:5000/transactions?userId=${user.id}`);
         const data = await response.json();
-        console.log('Fetched transactions:', data);
-
+        
         if (Array.isArray(data)) {
           setTransactions(data.reverse());
         } else {
@@ -27,8 +26,10 @@ function Points() {
       }
     };
 
-    fetchTransactions();
-  }, []);
+    if (user?.id) {
+      fetchTransactions();
+    }
+  }, [user?.id]);
 
   const handleTransfer = async (e) => {
     e.preventDefault();

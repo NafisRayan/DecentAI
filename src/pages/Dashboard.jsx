@@ -15,7 +15,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const response = await fetch('http://localhost:5000/transactions');
+        const response = await fetch(`http://localhost:5000/transactions?userId=${user.id}`);
         const data = await response.json();
         setRecentTransactions(data.slice(-5).reverse());
       } catch (error) {
@@ -25,8 +25,10 @@ function Dashboard() {
       }
     };
 
-    fetchTransactions();
-  }, []);
+    if (user?.id) {
+      fetchTransactions();
+    }
+  }, [user?.id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

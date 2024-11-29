@@ -27,7 +27,7 @@ function DataAnalytics() {
     try {
       const [users, transactions, polls, chats] = await Promise.all([
         fetch('http://localhost:5000/users').then(res => res.json()),
-        fetch('http://localhost:5000/transactions').then(res => res.json()),
+        fetch('http://localhost:5000/analytics/transactions').then(res => res.json()),
         fetch('http://localhost:5000/polls').then(res => res.json()),
         fetch('http://localhost:5000/chats').then(res => res.json())
       ]);
