@@ -10,13 +10,13 @@ DecentAI is a comprehensive platform that combines blockchain technology with ar
 
 Here are some screenshots of the app showcasing its key features and design:  
 
-<img src="dai1.png" alt="Home Screen" width="250" />  
+<img src="public/dai1.png" alt="Home Screen" width="250" />  
 
-<img src="dai2.png" alt="Polls" width="250" />  
+<img src="public/dai2.png" alt="Polls" width="250" />  
 
-<img src="dai3.png" alt="Surveys" width="250" />  
+<img src="public/dai3.png" alt="Surveys" width="250" />  
 
-<img src="dai4.png" alt="Sentiment" width="250" />  
+<img src="public/dai4.png" alt="Sentiment" width="250" />  
 
 ## 🚀 Core Features
 
