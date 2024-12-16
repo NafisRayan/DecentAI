@@ -109,21 +109,21 @@
             "id": 2,
             "roomId": "public",
             "userId": 3,
-            "message": "d",
+            "message": "Hey",
             "timestamp": "2024-11-15T21:13:37.049205"
         },
         {
             "id": 3,
             "roomId": "public",
             "userId": 2,
-            "message": "boo",
+            "message": "Whats Up",
             "timestamp": "2024-11-15T21:14:05.561454"
         },
         {
             "id": 4,
             "roomId": "public",
             "userId": 3,
-            "message": "a",
+            "message": "Hello",
             "timestamp": "2024-11-15T21:57:05.811327"
         },
         {
@@ -132,6 +132,13 @@
             "userId": 3,
             "message": "BYE BYE",
             "timestamp": "2024-11-16T22:35:44.559951"
+        },
+        {
+            "id": 6,
+            "roomId": "public",
+            "userId": 3,
+            "message": "Lets play a game",
+            "timestamp": "2024-12-16T11:49:12.676314"
         }
     ],
     "polls": [
@@ -155,7 +162,7 @@
         },
         {
             "id": 2,
-            "title": "ilabu",
+            "title": "important",
             "options": [
                 "y",
                 "n"
