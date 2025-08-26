@@ -17,7 +17,7 @@ app.secret_key = 'your-secret-key'
 
 def load_data():
     try:
-        with open('backend/data/db.json', 'r') as file:
+        with open('data/db.json', 'r') as file:
             return json.load(file)
     except Exception as e:
         print(f"Error loading data: {str(e)}")
@@ -25,7 +25,7 @@ def load_data():
 
 def save_data(data):
     try:
-        with open('backend/data/db.json', 'w') as file:
+        with open('data/db.json', 'w') as file:
             json.dump(data, file, indent=4)
     except Exception as e:
         print(f"Error saving data: {str(e)}")

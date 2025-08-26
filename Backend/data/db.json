@@ -23,6 +23,14 @@
             "id": 4,
             "points": 0,
             "avatar": "/default-avatar.png"
+        },
+        {
+            "username": "vau1",
+            "email": "vau@gmail.com",
+            "password": "scrypt:32768:8:1$03Zlto6JqtCUC3yo$de99231e462a1464b9b358b2c1a32f43a0e13edab9842d6afd834850bf2ea41024d475c59e05811d21c2a286b833cd8aa296280f0aef4cf2758140c810a53177",
+            "id": 5,
+            "points": 0,
+            "avatar": "/default-avatar.png"
         }
     ],
     "transactions": [
