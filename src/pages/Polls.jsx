@@ -7,6 +7,7 @@ function Polls() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newPoll, setNewPoll] = useState({ title: '', options: ['', ''] });
   const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchPolls();
@@ -108,16 +109,46 @@ function Polls() {
     return poll?.voters?.some(voterId => voterId === user.id);
   };
 
+  // Filter polls based on search term
+  const filteredPolls = polls.filter(poll => {
+    if (!searchTerm) return true;
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      poll.title.toLowerCase().includes(searchLower) ||
+      poll.options.some(option => option.toLowerCase().includes(searchLower))
+    );
+  });
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Polls</h1>
-        <button
-          onClick={() => setShowCreateModal(!showCreateModal)}
-          className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90"
-        >
-          {showCreateModal ? 'Cancel' : 'Create Poll'}
-        </button>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <input
+              type="text"
+              placeholder="Search polls..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="px-3 py-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                title="Clear search"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+          <button
+            onClick={() => setShowCreateModal(!showCreateModal)}
+            className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90"
+          >
+            {showCreateModal ? 'Cancel' : 'Create Poll'}
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -194,7 +225,7 @@ function Polls() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {polls.map((poll) => (
+        {filteredPolls.map((poll) => (
           <div key={poll.id} className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-lg font-semibold mb-4">{poll.title}</h2>
             <div className="space-y-3">
@@ -235,6 +266,19 @@ function Polls() {
             </div>
           </div>
         ))}
+        {filteredPolls.length === 0 && searchTerm && (
+          <div className="col-span-full text-center py-8">
+            <div className="bg-gray-100 rounded-lg p-6">
+              <p className="text-gray-500 text-lg">No polls found matching "{searchTerm}"</p>
+              <button
+                onClick={() => setSearchTerm('')}
+                className="mt-2 text-primary hover:text-primary/80 underline"
+              >
+                Clear search to see all polls
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
