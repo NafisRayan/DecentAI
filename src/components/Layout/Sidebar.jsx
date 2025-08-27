@@ -1,26 +1,28 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
-  HomeIcon, 
-  CurrencyDollarIcon, 
-  ChatBubbleLeftIcon,
-  ChartBarIcon,
-  SparklesIcon,
-  CogIcon
-} from '@heroicons/react/24/outline';
+  FaHome, 
+  FaDollarSign, 
+  FaComments,
+  FaVoteYea,
+  FaChartLine,
+  FaSmile,
+  FaMagic,
+  FaCog
+} from 'react-icons/fa';
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
 
   const navigation = [
-    { name: 'Dashboard', icon: HomeIcon, path: '/' },
-    { name: 'Currency Points', icon: CurrencyDollarIcon, path: '/points' },
-    { name: 'Chat', icon: ChatBubbleLeftIcon, path: '/chat' },
-    { name: 'AI Chat', icon: SparklesIcon, path: '/ai-chat' },
-    { name: 'Polls', icon: ChartBarIcon, path: '/polls' },
-    { name: 'Data Analytics', icon: ChartBarIcon, path: '/data-analytics' },
-    { name: 'Sentiment Analysis', icon: ChartBarIcon, path: '/sentiment-analysis' },
-    { name: 'Settings', icon: CogIcon, path: '/user-settings' },
+    { name: 'Dashboard', icon: FaHome, path: '/' },
+    { name: 'Currency Points', icon: FaDollarSign, path: '/points' },
+    { name: 'Chat', icon: FaComments, path: '/chat' },
+    { name: 'AI Chat', icon: FaMagic, path: '/ai-chat' },
+    { name: 'Polls', icon: FaVoteYea, path: '/polls' },
+    { name: 'Data Analytics', icon: FaChartLine, path: '/data-analytics' },
+    { name: 'Sentiment Analysis', icon: FaSmile, path: '/sentiment-analysis' },
+    { name: 'Settings', icon: FaCog, path: '/user-settings' },
     
   ];
 

@@ -4,7 +4,6 @@
   "private": true,
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
-    "@heroicons/react": "^2.1.5",
     "@huggingface/inference": "^2.8.1",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -50,4 +49,3 @@
   },
   "proxy": "http://localhost:5000"
 }
-
