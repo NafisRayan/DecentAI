@@ -76,23 +76,28 @@ cd DecentAI
 npm install
 ```
 
-3. Set up the backend environment:
-   - Create a virtual environment:
-   ```bash
-   python -m venv venv
-   ```
-   - Activate the virtual environment:
-   ```bash
-   # On Windows
-   venv\Scripts\activate
-   # On macOS/Linux
-   source venv/bin/activate
-   ```
-   - Install backend dependencies:
-   ```bash
-   cd Backend
-   pip install -r requirements.txt
-   ```
+
+## 🛠️ Backend Setup
+
+1. Create a Python virtual environment in the `Backend` folder:
+  ```powershell
+  python -m venv Backend/venv
+  ```
+
+2. Activate the virtual environment:
+  ```powershell
+  Backend\venv\Scripts\Activate.ps1
+  ```
+
+3. Install backend dependencies:
+  ```powershell
+  pip install -r Backend/requirements.txt
+  ```
+
+4. Run the backend server:
+  ```powershell
+  python Backend/app.py
+  ```
 
 ## 🚀 Running the Application
 

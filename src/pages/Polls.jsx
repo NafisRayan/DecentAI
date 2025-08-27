@@ -57,8 +57,13 @@ function Polls() {
   };
 
   const handleVote = async (pollId, option) => {
+    if (!user || !user.id) {
+      setError('You must be logged in to vote');
+      return;
+    }
+
     const poll = polls.find(p => p.id === pollId);
-    if (poll.voters && poll.voters.some(voterId => voterId.$oid === user.id.$oid)) {
+    if (poll.voters && poll.voters.some(voterId => voterId === user.id)) {
       setError('You have already voted on this poll');
       return;
     }
@@ -72,7 +77,7 @@ function Polls() {
         credentials: 'include',
         body: JSON.stringify({ 
           option,
-          userId: user.id.$oid
+          userId: user.id
         }),
       });
 
@@ -82,6 +87,9 @@ function Polls() {
           poll.id === pollId ? updatedPoll : poll
         ));
         setError('');
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Failed to submit vote');
       }
     } catch (error) {
       console.error('Error voting:', error);
@@ -95,8 +103,9 @@ function Polls() {
   };
 
   const hasVoted = (pollId) => {
+    if (!user || !user.id) return false;
     const poll = polls.find(p => p.id === pollId);
-    return poll?.voters?.some(voterId => voterId && voterId.$oid && user.id && user.id.$oid && voterId.$oid === user.id.$oid);
+    return poll?.voters?.some(voterId => voterId === user.id);
   };
 
   return (

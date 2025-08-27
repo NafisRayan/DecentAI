@@ -66,6 +66,8 @@ def get_chats():
 @app.route('/polls', methods=['GET'])
 def get_polls():
     polls = list(polls_collection.find({}))
+    for poll in polls:
+        poll['id'] = str(poll['_id'])
     return json.loads(json_util.dumps(polls))
 
 @app.route('/polls/<poll_id>', methods=['GET'])
@@ -73,6 +75,7 @@ def get_poll(poll_id):
     try:
         poll = polls_collection.find_one({'_id': ObjectId(poll_id)})
         if poll:
+            poll['id'] = str(poll['_id'])
             return json.loads(json_util.dumps(poll))
         return jsonify({'error': 'Poll not found'}), 404
     except Exception as e:
@@ -224,7 +227,7 @@ def vote_poll(poll_id):
         if not poll['active']:
             return jsonify({'error': 'Poll is closed'}), 400
             
-        # Convert userId to ObjectId for proper comparison and storage
+        # Check if user has already voted
         user_object_id = ObjectId(vote_data['userId'])
         if str(user_object_id) in [str(voter_id) for voter_id in poll.get('voters', [])]:
             return jsonify({'error': 'User has already voted'}), 400
@@ -242,6 +245,7 @@ def vote_poll(poll_id):
         )
         
         updated_poll = polls_collection.find_one({'_id': ObjectId(poll_id)})
+        updated_poll['id'] = str(updated_poll['_id'])
         return json.loads(json_util.dumps(updated_poll))
     except Exception as e:
         return jsonify({'error': str(e)}), 500
