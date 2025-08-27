@@ -34,6 +34,10 @@ analysis_history_collection = db.analysisHistory
 @app.route('/users', methods=['GET'])
 def get_users():
     users = list(users_collection.find({}, {'password': 0})) # Exclude password from results
+    # Convert ObjectIds to strings for frontend consistency
+    for user in users:
+        user['id'] = str(user['_id'])
+        del user['_id']
     return json.loads(json_util.dumps(users))
 
 @app.route('/transactions', methods=['GET'])
@@ -61,6 +65,11 @@ def get_transactions():
 @app.route('/chats', methods=['GET'])
 def get_chats():
     chats = list(chats_collection.find({}))
+    # Convert ObjectIds to strings for frontend consistency
+    for chat in chats:
+        chat['id'] = str(chat['_id'])
+        chat['userId'] = str(chat['userId'])
+        del chat['_id']
     return json.loads(json_util.dumps(chats))
 
 @app.route('/polls', methods=['GET'])
@@ -255,15 +264,18 @@ def vote_poll(poll_id):
 def create_message():
     try:
         message_data = request.json
+        if not message_data or 'userId' not in message_data or 'message' not in message_data:
+            return jsonify({'error': 'userId and message are required'}), 400
+            
         new_message = {
-            'roomId': message_data['roomId'],
-            'userId': ObjectId(message_data['userId']), # Store userId as ObjectId
+            'roomId': message_data.get('roomId', 'public'),
+            'userId': ObjectId(message_data['userId']),
             'message': message_data['message'],
             'timestamp': datetime.utcnow().isoformat()
         }
         result = chats_collection.insert_one(new_message)
         new_message['id'] = str(result.inserted_id)
-        # new_message['userId'] is already an ObjectId, json_util.dumps will handle it
+        new_message['userId'] = str(new_message['userId'])  # Convert to string for frontend
         return json.loads(json_util.dumps(new_message)), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500

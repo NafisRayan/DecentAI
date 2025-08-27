@@ -33,7 +33,7 @@ function Chat() {
         const data = await response.json();
         const map = {};
         data.forEach(user => {
-          map[user._id.$oid] = user.username;
+          map[user.id] = user.username;
         });
         setUsersMap(map);
       } catch (error) {
@@ -89,6 +89,10 @@ function Chat() {
   const handleSend = async (e) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
+    if (!user || !user.id) {
+      console.error('User not authenticated');
+      return;
+    }
 
     try {
       const response = await fetch('http://localhost:5000/chats', {
@@ -99,7 +103,7 @@ function Chat() {
         credentials: 'include',
         body: JSON.stringify({
           roomId: 'public',
-          userId: user.id.$oid,
+          userId: user.id,
           message: newMessage,
         }),
       });
@@ -108,6 +112,8 @@ function Chat() {
         const newMsg = await response.json();
         setMessages(prev => [...prev, newMsg]);
         setNewMessage('');
+      } else {
+        console.error('Failed to send message:', response.statusText);
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -118,23 +124,29 @@ function Chat() {
     <div className="p-6 h-[calc(100vh-theme(spacing.16))] flex flex-col">
       <h1 className="text-2xl font-bold mb-6">Chat Room</h1>
       
+      {!user && (
+        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
+          Please log in to participate in the chat.
+        </div>
+      )}
+      
       <div className="flex-1 bg-white rounded-lg shadow overflow-hidden flex flex-col">
         <div className="flex-1 p-4 overflow-y-auto">
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`mb-4 flex ${message.userId.$oid === user.id.$oid ? 'justify-end' : 'justify-start'} items-center`}
+              className={`mb-4 flex ${message.userId === user?.id ? 'justify-end' : 'justify-start'} items-center`}
             >
               <div className={`max-w-[70%] rounded-lg p-3 ${
-                message.userId.$oid === user.id.$oid ? 'bg-primary text-white' : 'bg-gray-100'
+                message.userId === user?.id ? 'bg-primary text-white' : 'bg-gray-100'
               }`}>
-                <p className="font-semibold">{usersMap[message.userId.$oid] || 'Unknown User'}</p>
+                <p className="font-semibold">{usersMap[message.userId] || 'Unknown User'}</p>
                 <p>{message.message}</p>
                 <p className="text-xs mt-1 opacity-70">
                   {new Date(message.timestamp).toLocaleTimeString()}
                 </p>
               </div>
-              {message.userId.$oid !== user.id.$oid && (
+              {message.userId !== user?.id && (
                 <button
                   onClick={() => readOutLoud(message.message)}
                   className="ml-2 p-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
@@ -152,7 +164,8 @@ function Chat() {
             <button
               type="button"
               onClick={startSpeechRecognition}
-              className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              disabled={!user}
+              className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <FaMicrophone />
             </button>
@@ -160,12 +173,14 @@ function Chat() {
               type="text"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              className="flex-1 p-2 border rounded"
-              placeholder="Type a message..."
+              disabled={!user}
+              className="flex-1 p-2 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+              placeholder={user ? "Type a message..." : "Please log in to chat"}
             />
             <button
               type="submit"
-              className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90"
+              disabled={!user || !newMessage.trim()}
+              className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Send
             </button>
