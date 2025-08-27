@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request, session
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+from datetime import datetime, timedelta
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import os
@@ -119,7 +119,7 @@ def create_transaction():
             'senderId': sender_id,
             'receiverId': receiver_id,
             'amount': amount,
-            'timestamp': datetime.utcnow().isoformat()
+            'timestamp': (datetime.utcnow() + timedelta(hours=6)).isoformat()
         }
         result = transactions_collection.insert_one(new_transaction)
         new_transaction['id'] = str(result.inserted_id)
@@ -145,6 +145,9 @@ def register():
         new_user_data['password'] = generate_password_hash(new_user_data['password'])
         new_user_data['points'] = 0
         new_user_data['avatar'] = '/default-avatar.png'
+        # Use Bangladesh time (UTC+6)
+        bangladesh_time = datetime.utcnow() + timedelta(hours=6)
+        new_user_data['created_at'] = bangladesh_time.isoformat()
         
         result = users_collection.insert_one(new_user_data)
         
@@ -271,7 +274,7 @@ def create_message():
             'roomId': message_data.get('roomId', 'public'),
             'userId': ObjectId(message_data['userId']),
             'message': message_data['message'],
-            'timestamp': datetime.utcnow().isoformat()
+            'timestamp': (datetime.utcnow() + timedelta(hours=6)).isoformat()
         }
         result = chats_collection.insert_one(new_message)
         new_message['id'] = str(result.inserted_id)

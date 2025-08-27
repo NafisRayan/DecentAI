@@ -22,6 +22,11 @@ function DataAnalytics() {
     activePolls: 0,
   });
 
+  const [searchTerms, setSearchTerms] = useState({
+    chats: '',
+    users: ''
+  });
+
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
   const fetchData = useCallback(async () => {
@@ -94,6 +99,29 @@ function DataAnalytics() {
     const totalAmount = data.transactions.reduce((sum, t) => sum + t.amount, 0);
     const averageTransactionAmount = data.transactions.length ? (totalAmount / data.transactions.length).toFixed(2) : 0;
 
+    // Filter chats based on search term
+    const filteredChats = data.chats.filter(chat => {
+      if (!searchTerms.chats) return true;
+      const userInfo = usersMap[chat.userId] || {};
+      const searchLower = searchTerms.chats.toLowerCase();
+      return (
+        (userInfo.username || '').toLowerCase().includes(searchLower) ||
+        (userInfo.email || '').toLowerCase().includes(searchLower) ||
+        (chat.message || '').toLowerCase().includes(searchLower)
+      );
+    });
+
+    // Filter users based on search term
+    const filteredUsers = data.users.filter(user => {
+      if (!searchTerms.users) return true;
+      const searchLower = searchTerms.users.toLowerCase();
+      return (
+        (user.username || '').toLowerCase().includes(searchLower) ||
+        (user.email || '').toLowerCase().includes(searchLower) ||
+        (user.id || '').toLowerCase().includes(searchLower)
+      );
+    });
+
     return {
       transactionTrend: Object.entries(transactionsByDate).map(([date, amount]) => ({
         date,
@@ -104,9 +132,11 @@ function DataAnalytics() {
         value
       })),
       averageTransactionAmount,
-      usersMap
+      usersMap,
+      filteredChats,
+      filteredUsers
     };
-  }, [data.transactions, data.polls, data.users, stats.totalUsers]);
+  }, [data.transactions, data.polls, data.users, data.chats, stats.totalUsers, searchTerms]);
 
   const pollData = useMemo(() => {
     return data.polls.map(poll => ({
@@ -246,7 +276,27 @@ function DataAnalytics() {
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow mt-6">
-        <h2 className="text-lg font-semibold mb-4">Chat Messages</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">Chat Messages</h2>
+          <div className="flex items-center space-x-2">
+            <input
+              type="text"
+              placeholder="Search chats..."
+              value={searchTerms.chats}
+              onChange={(e) => setSearchTerms(prev => ({ ...prev, chats: e.target.value }))}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
+            {searchTerms.chats && (
+              <button
+                onClick={() => setSearchTerms(prev => ({ ...prev, chats: '' }))}
+                className="px-3 py-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                title="Clear search"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
         <table className="min-w-full divide-y divide-gray-200">
           <thead>
             <tr>
@@ -265,7 +315,7 @@ function DataAnalytics() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {data.chats.map((chat) => {
+            {processedData?.filteredChats.map((chat) => {
               const userInfo = processedData?.usersMap[chat.userId] || {};
               return (
                 <tr key={chat.id}>
@@ -286,10 +336,35 @@ function DataAnalytics() {
             })}
           </tbody>
         </table>
+        {processedData?.filteredChats.length === 0 && searchTerms.chats && (
+          <div className="text-center py-4 text-gray-500">
+            No chat messages found matching "{searchTerms.chats}"
+          </div>
+        )}
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow mt-6">
-        <h2 className="text-lg font-semibold mb-4">Registered Users</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">Registered Users</h2>
+          <div className="flex items-center space-x-2">
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={searchTerms.users}
+              onChange={(e) => setSearchTerms(prev => ({ ...prev, users: e.target.value }))}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
+            {searchTerms.users && (
+              <button
+                onClick={() => setSearchTerms(prev => ({ ...prev, users: '' }))}
+                className="px-3 py-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                title="Clear search"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
         <table className="min-w-full divide-y divide-gray-200">
           <thead>
             <tr>
@@ -308,7 +383,7 @@ function DataAnalytics() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {data.users.map((user) => (
+            {processedData?.filteredUsers.map((user) => (
               <tr key={user.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {user.id}
@@ -326,6 +401,11 @@ function DataAnalytics() {
             ))}
           </tbody>
         </table>
+        {processedData?.filteredUsers.length === 0 && searchTerms.users && (
+          <div className="text-center py-4 text-gray-500">
+            No users found matching "{searchTerms.users}"
+          </div>
+        )}
       </div>
     </div>
   );
