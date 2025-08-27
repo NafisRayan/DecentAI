@@ -21,23 +21,27 @@ function LoginRegister() {
 
     try {
       if (isLogin) {
-        await login({
+        const userData = await login({
           username: formData.username,
           password: formData.password
         });
-        navigate('/');
+        if (userData) {
+          navigate('/');
+        }
       } else {
         if (formData.password !== formData.confirmPassword) {
           setError('Passwords do not match');
           return;
         }
-        await register({
+        const registrationData = await register({
           username: formData.username,
           email: formData.email,
           password: formData.password
         });
-        setIsLogin(true);
-        setError('Registration successful! Please login.');
+        if (registrationData) {
+          setIsLogin(true);
+          setError('Registration successful! Please login.');
+        }
       }
     } catch (error) {
       setError(error.message || 'Authentication failed. Please try again.');

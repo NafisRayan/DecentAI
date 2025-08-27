@@ -58,7 +58,7 @@ function Polls() {
 
   const handleVote = async (pollId, option) => {
     const poll = polls.find(p => p.id === pollId);
-    if (poll.voters && poll.voters.includes(user.id)) {
+    if (poll.voters && poll.voters.some(voterId => voterId.$oid === user.id.$oid)) {
       setError('You have already voted on this poll');
       return;
     }
@@ -72,7 +72,7 @@ function Polls() {
         credentials: 'include',
         body: JSON.stringify({ 
           option,
-          userId: user.id 
+          userId: user.id.$oid
         }),
       });
 
@@ -96,7 +96,7 @@ function Polls() {
 
   const hasVoted = (pollId) => {
     const poll = polls.find(p => p.id === pollId);
-    return poll?.voters?.includes(user.id);
+    return poll?.voters?.some(voterId => voterId && voterId.$oid && user.id && user.id.$oid && voterId.$oid === user.id.$oid);
   };
 
   return (

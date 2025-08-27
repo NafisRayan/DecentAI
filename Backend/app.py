@@ -18,15 +18,6 @@ CORS(app,
      }})
 app.secret_key = 'your-secret-key'
 
-class CustomEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, ObjectId):
-            return str(obj)
-        if isinstance(obj, datetime):
-            return obj.isoformat()
-        return json.JSONEncoder.default(self, obj)
-
-app.json_encoder = CustomEncoder
 
 # MongoDB connection
 MONGO_URI = os.getenv('MONGODB_URI', 'mongodb+srv://vaugheu:tempA@cluster0.yfpgp8o.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
@@ -233,7 +224,9 @@ def vote_poll(poll_id):
         if not poll['active']:
             return jsonify({'error': 'Poll is closed'}), 400
             
-        if vote_data['userId'] in poll.get('voters', []):
+        # Convert userId to ObjectId for proper comparison and storage
+        user_object_id = ObjectId(vote_data['userId'])
+        if str(user_object_id) in [str(voter_id) for voter_id in poll.get('voters', [])]:
             return jsonify({'error': 'User has already voted'}), 400
             
         # Increment vote count for the chosen option
@@ -245,7 +238,7 @@ def vote_poll(poll_id):
         # Add user to voters list
         polls_collection.update_one(
             {'_id': ObjectId(poll_id)},
-            {'$addToSet': {'voters': vote_data['userId']}}
+            {'$addToSet': {'voters': user_object_id}}
         )
         
         updated_poll = polls_collection.find_one({'_id': ObjectId(poll_id)})
@@ -266,7 +259,7 @@ def create_message():
         }
         result = chats_collection.insert_one(new_message)
         new_message['id'] = str(result.inserted_id)
-        new_message['userId'] = str(new_message['userId'])
+        # new_message['userId'] is already an ObjectId, json_util.dumps will handle it
         return json.loads(json_util.dumps(new_message)), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500

@@ -32,6 +32,12 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.error || 'Login failed');
       }
 
+      // Ensure _id is a string if it exists
+      // Ensure _id is a string if it exists
+      if (data._id && typeof data._id === 'object' && data._id.$oid) {
+        data.id = data._id.$oid;
+        delete data._id; // Remove the original _id object
+      }
       setUser(data);
       localStorage.setItem('user', JSON.stringify(data));
       return data;

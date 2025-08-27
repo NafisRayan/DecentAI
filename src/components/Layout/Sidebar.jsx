@@ -21,6 +21,7 @@ const Sidebar = () => {
     { name: 'Polls', icon: ChartBarIcon, path: '/polls' },
     { name: 'Data Analytics', icon: ChartBarIcon, path: '/data-analytics' },
     { name: 'Sentiment Analysis', icon: ChartBarIcon, path: '/sentiment-analysis' },
+    { name: 'Users List', icon: UserIcon, path: '/users-list' },
     { name: 'Settings', icon: CogIcon, path: '/user-settings' },
     
   ];

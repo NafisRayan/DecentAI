@@ -9,6 +9,7 @@ import Polls from './pages/Polls';
 import AIChat from './pages/AIChat';
 import DataAnalytics from './pages/DataAnalytics';
 import UserSettings from './pages/UserSettings';
+import UsersList from './pages/UsersList';
 import SentimentAnalysis from './pages/SentimentAnalysis';
 
 function ProtectedRoute({ children }) {
@@ -77,6 +78,12 @@ function App() {
           <Route path="/sentiment-analysis" element={
             <ProtectedRoute>
               <SentimentAnalysis />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/users-list" element={
+            <ProtectedRoute>
+              <UsersList />
             </ProtectedRoute>
           } />
         </Routes>
