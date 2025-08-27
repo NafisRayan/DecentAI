@@ -215,11 +215,14 @@ def update_user(user_id):
 def create_poll():
     try:
         poll_data = request.json
+        # Use Bangladesh time (UTC+6)
+        bangladesh_time = datetime.utcnow() + timedelta(hours=6)
         new_poll = {
             'title': poll_data['title'],
             'options': poll_data['options'],
             'votes': {option: 0 for option in poll_data['options']},
-            'active': True
+            'active': True,
+            'created_at': bangladesh_time.isoformat()
         }
         result = polls_collection.insert_one(new_poll)
         new_poll['id'] = str(result.inserted_id)

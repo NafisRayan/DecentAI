@@ -109,6 +109,18 @@ function Polls() {
     return poll?.voters?.some(voterId => voterId === user.id);
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   // Filter polls based on search term
   const filteredPolls = polls.filter(poll => {
     if (!searchTerm) return true;
@@ -227,7 +239,12 @@ function Polls() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {filteredPolls.map((poll) => (
           <div key={poll.id} className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">{poll.title}</h2>
+            <div className="flex justify-between items-start mb-4">
+              <h2 className="text-lg font-semibold">{poll.title}</h2>
+              <span className="text-xs text-gray-400 whitespace-nowrap ml-4">
+                {formatDate(poll.created_at)}
+              </span>
+            </div>
             <div className="space-y-3">
               {poll.options.map((option) => (
                 <div key={option} className="space-y-2">
