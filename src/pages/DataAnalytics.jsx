@@ -10,6 +10,7 @@ function DataAnalytics() {
     transactions: [],
     polls: [],
     chats: [],
+    users: [],
     loading: true,
     error: null
   });
@@ -36,6 +37,7 @@ function DataAnalytics() {
         transactions,
         polls,
         chats,
+        users,
         loading: false,
         error: null
       });
@@ -51,6 +53,7 @@ function DataAnalytics() {
         transactions: [],
         polls: [],
         chats: [],
+        users: [],
         loading: false,
         error: 'Failed to load analytics data'
       });
@@ -64,6 +67,15 @@ function DataAnalytics() {
 
   const processedData = useMemo(() => {
     if (!data.transactions.length || !data.polls.length) return null;
+
+    // Create users map for quick lookup
+    const usersMap = data.users.reduce((acc, user) => {
+      acc[user.id] = {
+        username: user.username,
+        email: user.email
+      };
+      return acc;
+    }, {});
 
     const transactionsByDate = data.transactions.reduce((acc, curr) => {
       const date = new Date(curr.timestamp).toLocaleDateString();
@@ -91,9 +103,10 @@ function DataAnalytics() {
         name,
         value
       })),
-      averageTransactionAmount
+      averageTransactionAmount,
+      usersMap
     };
-  }, [data.transactions, data.polls, stats.totalUsers]);
+  }, [data.transactions, data.polls, data.users, stats.totalUsers]);
 
   const pollData = useMemo(() => {
     return data.polls.map(poll => ({
@@ -238,7 +251,10 @@ function DataAnalytics() {
           <thead>
             <tr>
               <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                User ID
+                Username
+              </th>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Email
               </th>
               <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Message
@@ -249,19 +265,25 @@ function DataAnalytics() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {data.chats.map((chat) => (
-              <tr key={chat.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {chat.userId.$oid || chat.userId}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {chat.message}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(chat.timestamp).toLocaleString()}
-                </td>
-              </tr>
-            ))}
+            {data.chats.map((chat) => {
+              const userInfo = processedData?.usersMap[chat.userId] || {};
+              return (
+                <tr key={chat.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {userInfo.username || 'Unknown User'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {userInfo.email || 'N/A'}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
+                    {chat.message}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(chat.timestamp).toLocaleString()}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
