@@ -51,7 +51,7 @@ function AIChat() {
     }
   };
 
-  const genAI = new GoogleGenerativeAI("AIzaSyCMenNFHgeac3eUnjq5XeqDPzJvyng8LWM");
+  const genAI = new GoogleGenerativeAI("AIzaSyCNBXyQZSJFC1Cf0MrWGZBFm4OvKji7W1o");
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const handleSubmit = async (e) => {

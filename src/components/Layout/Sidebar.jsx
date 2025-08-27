@@ -5,7 +5,6 @@ import {
   CurrencyDollarIcon, 
   ChatBubbleLeftIcon,
   ChartBarIcon,
-  UserIcon,
   SparklesIcon,
   CogIcon
 } from '@heroicons/react/24/outline';

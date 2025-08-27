@@ -10,6 +10,7 @@ function DataAnalytics() {
     transactions: [],
     polls: [],
     chats: [],
+    users: [],
     loading: true,
     error: null
   });
@@ -19,6 +20,11 @@ function DataAnalytics() {
     totalTransactions: 0,
     totalPolls: 0,
     activePolls: 0,
+  });
+
+  const [searchTerms, setSearchTerms] = useState({
+    chats: '',
+    users: ''
   });
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
@@ -36,6 +42,7 @@ function DataAnalytics() {
         transactions,
         polls,
         chats,
+        users,
         loading: false,
         error: null
       });
@@ -51,6 +58,7 @@ function DataAnalytics() {
         transactions: [],
         polls: [],
         chats: [],
+        users: [],
         loading: false,
         error: 'Failed to load analytics data'
       });
@@ -64,6 +72,15 @@ function DataAnalytics() {
 
   const processedData = useMemo(() => {
     if (!data.transactions.length || !data.polls.length) return null;
+
+    // Create users map for quick lookup
+    const usersMap = data.users.reduce((acc, user) => {
+      acc[user.id] = {
+        username: user.username,
+        email: user.email
+      };
+      return acc;
+    }, {});
 
     const transactionsByDate = data.transactions.reduce((acc, curr) => {
       const date = new Date(curr.timestamp).toLocaleDateString();
@@ -82,6 +99,29 @@ function DataAnalytics() {
     const totalAmount = data.transactions.reduce((sum, t) => sum + t.amount, 0);
     const averageTransactionAmount = data.transactions.length ? (totalAmount / data.transactions.length).toFixed(2) : 0;
 
+    // Filter chats based on search term
+    const filteredChats = data.chats.filter(chat => {
+      if (!searchTerms.chats) return true;
+      const userInfo = usersMap[chat.userId] || {};
+      const searchLower = searchTerms.chats.toLowerCase();
+      return (
+        (userInfo.username || '').toLowerCase().includes(searchLower) ||
+        (userInfo.email || '').toLowerCase().includes(searchLower) ||
+        (chat.message || '').toLowerCase().includes(searchLower)
+      );
+    });
+
+    // Filter users based on search term
+    const filteredUsers = data.users.filter(user => {
+      if (!searchTerms.users) return true;
+      const searchLower = searchTerms.users.toLowerCase();
+      return (
+        (user.username || '').toLowerCase().includes(searchLower) ||
+        (user.email || '').toLowerCase().includes(searchLower) ||
+        (user.id || '').toLowerCase().includes(searchLower)
+      );
+    });
+
     return {
       transactionTrend: Object.entries(transactionsByDate).map(([date, amount]) => ({
         date,
@@ -91,9 +131,12 @@ function DataAnalytics() {
         name,
         value
       })),
-      averageTransactionAmount
+      averageTransactionAmount,
+      usersMap,
+      filteredChats,
+      filteredUsers
     };
-  }, [data.transactions, data.polls, stats.totalUsers]);
+  }, [data.transactions, data.polls, data.users, data.chats, stats.totalUsers, searchTerms]);
 
   const pollData = useMemo(() => {
     return data.polls.map(poll => ({
@@ -233,12 +276,35 @@ function DataAnalytics() {
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow mt-6">
-        <h2 className="text-lg font-semibold mb-4">Chat Messages</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">Chat Messages</h2>
+          <div className="flex items-center space-x-2">
+            <input
+              type="text"
+              placeholder="Search chats..."
+              value={searchTerms.chats}
+              onChange={(e) => setSearchTerms(prev => ({ ...prev, chats: e.target.value }))}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
+            {searchTerms.chats && (
+              <button
+                onClick={() => setSearchTerms(prev => ({ ...prev, chats: '' }))}
+                className="px-3 py-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                title="Clear search"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
         <table className="min-w-full divide-y divide-gray-200">
           <thead>
             <tr>
               <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                User ID
+                Username
+              </th>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Email
               </th>
               <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Message
@@ -249,21 +315,97 @@ function DataAnalytics() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {data.chats.map((chat) => (
-              <tr key={chat.id}>
+            {processedData?.filteredChats.map((chat) => {
+              const userInfo = processedData?.usersMap[chat.userId] || {};
+              return (
+                <tr key={chat.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {userInfo.username || 'Unknown User'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {userInfo.email || 'N/A'}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
+                    {chat.message}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(chat.timestamp).toLocaleString()}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        {processedData?.filteredChats.length === 0 && searchTerms.chats && (
+          <div className="text-center py-4 text-gray-500">
+            No chat messages found matching "{searchTerms.chats}"
+          </div>
+        )}
+      </div>
+
+      <div className="bg-white p-6 rounded-lg shadow mt-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">Registered Users</h2>
+          <div className="flex items-center space-x-2">
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={searchTerms.users}
+              onChange={(e) => setSearchTerms(prev => ({ ...prev, users: e.target.value }))}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
+            {searchTerms.users && (
+              <button
+                onClick={() => setSearchTerms(prev => ({ ...prev, users: '' }))}
+                className="px-3 py-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                title="Clear search"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead>
+            <tr>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                User ID
+              </th>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Username
+              </th>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Email
+              </th>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Created At
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {processedData?.filteredUsers.map((user) => (
+              <tr key={user.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {chat.userId}
+                  {user.id}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {user.username}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {chat.message}
+                  {user.email}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(chat.timestamp).toLocaleString()}
+                  {user.created_at ? new Date(user.created_at).toLocaleString() : 'N/A'}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+        {processedData?.filteredUsers.length === 0 && searchTerms.users && (
+          <div className="text-center py-4 text-gray-500">
+            No users found matching "{searchTerms.users}"
+          </div>
+        )}
       </div>
     </div>
   );
