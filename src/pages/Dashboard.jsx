@@ -97,12 +97,30 @@ function Dashboard() {
         const updatedUser = await response.json();
         setUser(updatedUser);
         setEditing(false);
+        
+        // Show notification that user needs to re-login
         setNotification({
           type: 'success',
-          message: 'Profile updated successfully!'
+          message: 'Profile updated successfully! For security reasons, you will be logged out. Please log in again to continue.'
         });
-        // Clear notification after 3 seconds
-        setTimeout(() => setNotification(null), 3000);
+        
+        // Automatically logout after 4 seconds
+        setTimeout(async () => {
+          try {
+            await logout();
+            setNotification({
+              type: 'info',
+              message: 'You have been logged out. Please log in again.'
+            });
+            setTimeout(() => setNotification(null), 3000);
+          } catch (error) {
+            console.error('Error during logout:', error);
+            setNotification({
+              type: 'error',
+              message: 'Profile updated but logout failed. Please refresh the page and log in again.'
+            });
+          }
+        }, 4000);
       } else {
         const errorData = await response.json();
         setNotification({
@@ -230,6 +248,7 @@ function Dashboard() {
                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                 className="w-full p-2 border rounded"
                 aria-label="Edit username"
+                disabled={updating}
               />
             </div>
             <div>
@@ -240,6 +259,7 @@ function Dashboard() {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="w-full p-2 border rounded"
                 aria-label="Edit email"
+                disabled={updating}
               />
             </div>
             <button
@@ -254,8 +274,9 @@ function Dashboard() {
         ) : (
           <button
             onClick={() => setEditing(true)}
-            className="text-sm text-primary hover:underline"
+            className="text-sm text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Edit profile"
+            disabled={updating}
           >
             Edit Profile
           </button>
