@@ -30,6 +30,7 @@ transactions_collection = db.transactions
 chats_collection = db.chats
 polls_collection = db.polls
 analysis_history_collection = db.analysisHistory
+admin_requests_collection = db.adminRequests
 
 @app.route('/users', methods=['GET'])
 def get_users():
@@ -151,6 +152,7 @@ def register():
         new_user_data['password'] = generate_password_hash(new_user_data['password'])
         new_user_data['points'] = 0
         new_user_data['avatar'] = '/default-avatar.png'
+        new_user_data['is_admin'] = False  # Add admin status
         # Use Bangladesh time (UTC+6)
         bangladesh_time = datetime.utcnow() + timedelta(hours=6)
         new_user_data['created_at'] = bangladesh_time.isoformat()
@@ -182,7 +184,8 @@ def login():
                 'username': user['username'],
                 'email': user['email'],
                 'points': user.get('points', 0),
-                'avatar': user.get('avatar', '/default-avatar.png')
+                'avatar': user.get('avatar', '/default-avatar.png'),
+                'is_admin': user.get('is_admin', False)
             }
             return json.loads(json_util.dumps(response_data))
         
@@ -206,7 +209,8 @@ def update_user(user_id):
             {'$set': {
                 'username': user_data.get('username'),
                 'email': user_data.get('email'),
-                'points': user_data.get('points')
+                'points': user_data.get('points'),
+                'is_admin': user_data.get('is_admin', False)
             }}
         )
         if result.matched_count:
@@ -337,6 +341,166 @@ def get_all_transactions():
             transaction['senderId'] = str(transaction['senderId'])
             transaction['receiverId'] = str(transaction['receiverId'])
         return json.loads(json_util.dumps(transactions))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Admin Routes
+@app.route('/admin/make-admin', methods=['POST'])
+def make_admin():
+    try:
+        data = request.json
+        user_id = data.get('user_id')
+        
+        if not user_id:
+            return jsonify({'error': 'User ID is required'}), 400
+            
+        result = users_collection.update_one(
+            {'_id': ObjectId(user_id)},
+            {'$set': {'is_admin': True}}
+        )
+        
+        if result.matched_count:
+            return jsonify({'message': 'User promoted to admin successfully'}), 200
+        return jsonify({'error': 'User not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/remove-admin', methods=['POST'])
+def remove_admin():
+    try:
+        data = request.json
+        user_id = data.get('user_id')
+        
+        if not user_id:
+            return jsonify({'error': 'User ID is required'}), 400
+            
+        result = users_collection.update_one(
+            {'_id': ObjectId(user_id)},
+            {'$set': {'is_admin': False}}
+        )
+        
+        if result.matched_count:
+            return jsonify({'message': 'Admin status removed successfully'}), 200
+        return jsonify({'error': 'User not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/delete-user/<user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    try:
+        result = users_collection.delete_one({'_id': ObjectId(user_id)})
+        
+        if result.deleted_count:
+            # Also delete user's transactions
+            transactions_collection.delete_many({
+                '$or': [{'senderId': ObjectId(user_id)}, {'receiverId': ObjectId(user_id)}]
+            })
+            return jsonify({'message': 'User deleted successfully'}), 200
+        return jsonify({'error': 'User not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/delete-poll/<poll_id>', methods=['DELETE'])
+def delete_poll(poll_id):
+    try:
+        result = polls_collection.delete_one({'_id': ObjectId(poll_id)})
+        
+        if result.deleted_count:
+            return jsonify({'message': 'Poll deleted successfully'}), 200
+        return jsonify({'error': 'Poll not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Admin Request Routes
+@app.route('/admin-requests', methods=['POST'])
+def create_admin_request():
+    try:
+        data = request.json
+        user_id = data.get('user_id')
+        reason = data.get('reason', '')
+        
+        if not user_id:
+            return jsonify({'error': 'User ID is required'}), 400
+            
+        # Check if user already has a pending request
+        existing_request = admin_requests_collection.find_one({
+            'user_id': user_id,
+            'status': 'pending'
+        })
+        
+        if existing_request:
+            return jsonify({'error': 'You already have a pending admin request'}), 400
+            
+        new_request = {
+            'user_id': user_id,
+            'reason': reason,
+            'status': 'pending',
+            'created_at': (datetime.utcnow() + timedelta(hours=6)).isoformat()
+        }
+        
+        result = admin_requests_collection.insert_one(new_request)
+        new_request['id'] = str(result.inserted_id)
+        return json.loads(json_util.dumps(new_request)), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin-requests', methods=['GET'])
+def get_admin_requests():
+    try:
+        requests = list(admin_requests_collection.find({}))
+        for request_item in requests:
+            request_item['id'] = str(request_item['_id'])
+            del request_item['_id']
+        return json.loads(json_util.dumps(requests))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin-requests/<request_id>/approve', methods=['POST'])
+def approve_admin_request(request_id):
+    try:
+        # Update request status
+        result = admin_requests_collection.update_one(
+            {'_id': ObjectId(request_id)},
+            {'$set': {'status': 'approved'}}
+        )
+        
+        if result.matched_count:
+            # Get the request to find user_id
+            request_doc = admin_requests_collection.find_one({'_id': ObjectId(request_id)})
+            if request_doc:
+                # Make user admin
+                users_collection.update_one(
+                    {'_id': ObjectId(request_doc['user_id'])},
+                    {'$set': {'is_admin': True}}
+                )
+            return jsonify({'message': 'Admin request approved'}), 200
+        return jsonify({'error': 'Request not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin-requests/<request_id>/reject', methods=['POST'])
+def reject_admin_request(request_id):
+    try:
+        result = admin_requests_collection.update_one(
+            {'_id': ObjectId(request_id)},
+            {'$set': {'status': 'rejected'}}
+        )
+        
+        if result.matched_count:
+            return jsonify({'message': 'Admin request rejected'}), 200
+        return jsonify({'error': 'Request not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin-requests/user/<user_id>', methods=['GET'])
+def get_user_admin_request(user_id):
+    try:
+        request_doc = admin_requests_collection.find_one({'user_id': user_id})
+        if request_doc:
+            request_doc['id'] = str(request_doc['_id'])
+            del request_doc['_id']
+            return json.loads(json_util.dumps(request_doc))
+        return jsonify({'message': 'No admin request found'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
