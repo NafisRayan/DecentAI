@@ -77,6 +77,9 @@ def get_polls():
     polls = list(polls_collection.find({}))
     for poll in polls:
         poll['id'] = str(poll['_id'])
+        # Convert ObjectIds in voters array to strings for frontend consistency
+        if 'voters' in poll and poll['voters']:
+            poll['voters'] = [str(voter_id) for voter_id in poll['voters']]
     return json.loads(json_util.dumps(polls))
 
 @app.route('/polls/<poll_id>', methods=['GET'])
@@ -85,6 +88,9 @@ def get_poll(poll_id):
         poll = polls_collection.find_one({'_id': ObjectId(poll_id)})
         if poll:
             poll['id'] = str(poll['_id'])
+            # Convert ObjectIds in voters array to strings for frontend consistency
+            if 'voters' in poll and poll['voters']:
+                poll['voters'] = [str(voter_id) for voter_id in poll['voters']]
             return json.loads(json_util.dumps(poll))
         return jsonify({'error': 'Poll not found'}), 404
     except Exception as e:

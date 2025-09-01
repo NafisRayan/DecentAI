@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 function Dashboard() {
   const { user, setUser, logout } = useAuth();
   const [recentTransactions, setRecentTransactions] = useState([]);
+  const [participatedPolls, setParticipatedPolls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editing, setEditing] = useState(false);
@@ -13,20 +14,44 @@ function Dashboard() {
   });
 
   useEffect(() => {
-    const fetchTransactions = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/transactions?userId=${user.id}`);
-        const data = await response.json();
-        setRecentTransactions(data.slice(-5).reverse());
+        // Fetch transactions
+        const transactionsResponse = await fetch(`http://localhost:5000/transactions?userId=${user.id}`);
+        const transactionsData = await transactionsResponse.json();
+        setRecentTransactions(transactionsData.slice(-5).reverse());
+
+        // Fetch all polls and filter participated ones
+        const pollsResponse = await fetch('http://localhost:5000/polls');
+        const pollsData = await pollsResponse.json();
+        
+        // Debug logging
+        console.log('User ID:', user.id);
+        console.log('Polls data:', pollsData);
+        
+        // Filter polls where user has voted
+        const userParticipatedPolls = pollsData.filter(poll => {
+          const hasVoted = poll.voters && poll.voters.some(voterId => {
+            const match = voterId === user.id;
+            console.log(`Poll ${poll.id}: checking voter ${voterId} against user ${user.id} - match: ${match}`);
+            return match;
+          });
+          console.log(`Poll ${poll.id} hasVoted: ${hasVoted}`);
+          return hasVoted;
+        });
+        
+        console.log('Filtered participated polls:', userParticipatedPolls);
+        
+        setParticipatedPolls(userParticipatedPolls.reverse()); // Show all participated polls, most recent first
       } catch (error) {
-        setError('Failed to fetch transactions. Please try again later.');
+        setError('Failed to fetch data. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
 
     if (user?.id) {
-      fetchTransactions();
+      fetchData();
     }
   }, [user?.id]);
 
@@ -97,6 +122,57 @@ function Dashboard() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Participated Polls Section */}
+      <div className="bg-white p-6 rounded-lg shadow mt-6">
+        <h2 className="text-lg font-semibold mb-4">My Poll Participation</h2>
+        {loading ? (
+          <p>Loading polls...</p>
+        ) : error ? (
+          <p className="text-red-500">{error}</p>
+        ) : participatedPolls.length === 0 ? (
+          <p className="text-gray-500">You haven't participated in any polls yet.</p>
+        ) : (
+          <div className="space-y-4">
+            {participatedPolls.map((poll) => {
+              const totalVotes = Object.values(poll.votes || {}).reduce((sum, votes) => sum + votes, 0);
+              return (
+                <div key={poll.id} className="border rounded-lg p-4 bg-gray-50">
+                  <h3 className="font-medium text-gray-900 mb-2">{poll.title}</h3>
+                  <div className="text-sm text-gray-600 mb-3">
+                    <p>Total Votes: {totalVotes}</p>
+                    <p className="text-xs text-gray-500">
+                      Created: {new Date(poll.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Results:</p>
+                    {Object.entries(poll.votes || {}).map(([option, votes]) => {
+                      const percentage = totalVotes > 0 ? ((votes / totalVotes) * 100).toFixed(1) : 0;
+                      return (
+                        <div key={option} className="flex items-center justify-between">
+                          <span className="text-sm text-gray-700 flex-1">{option}</span>
+                          <div className="flex items-center space-x-2 flex-1 max-w-xs">
+                            <div className="flex-1 bg-gray-200 rounded-full h-2">
+                              <div 
+                                className="bg-blue-500 h-2 rounded-full" 
+                                style={{ width: `${percentage}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-sm font-semibold min-w-[60px] text-right">
+                              {votes} ({percentage}%)
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Profile Section */}
