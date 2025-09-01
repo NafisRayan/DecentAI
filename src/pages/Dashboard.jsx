@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { FaUser, FaSignOutAlt, FaEdit } from 'react-icons/fa';
 
 function Dashboard() {
   const { user, setUser, logout } = useAuth();
@@ -182,6 +183,88 @@ function Dashboard() {
         </div>
       )}
       
+      {/* Profile Section - Moved to Top */}
+      <div className="w-full bg-white rounded-lg shadow p-6 mb-6">
+        <div className="flex justify-between items-start mb-6">
+          <div className="flex items-center space-x-4">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-3xl">
+              <FaUser />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold">{user?.username}</h2>
+              <p className="text-gray-500">{user?.email}</p>
+              <p className="text-sm text-gray-400 mt-1">Current Points: {user?.points || 0}</p>
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center space-x-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+            aria-label="Logout"
+          >
+            <FaSignOutAlt />
+            <span>Logout</span>
+          </button>
+        </div>
+
+        {editing ? (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Username</label>
+                <input
+                  type="text"
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  aria-label="Edit username"
+                  disabled={updating}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Email</label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  aria-label="Edit email"
+                  disabled={updating}
+                />
+              </div>
+            </div>
+            <div className="flex space-x-3">
+              <button
+                type="submit"
+                disabled={updating}
+                className="flex items-center space-x-2 px-6 py-2 bg-primary text-white rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                aria-label="Save profile changes"
+              >
+                <FaEdit className="text-sm" />
+                <span>{updating ? 'Updating...' : 'Save Changes'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditing(false)}
+                className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+                disabled={updating}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        ) : (
+          <button
+            onClick={() => setEditing(true)}
+            className="flex items-center space-x-2 text-sm text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Edit profile"
+            disabled={updating}
+          >
+            <FaEdit />
+            <span>Edit Profile</span>
+          </button>
+        )}
+      </div>
+      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Points Card */}
         <div className="bg-white p-6 rounded-lg shadow">
@@ -213,74 +296,6 @@ function Dashboard() {
             </div>
           )}
         </div>
-      </div>
-
-      {/* Profile Section */}
-      <div className="max-w-2xl bg-white rounded-lg shadow p-6 mt-6">
-        <div className="flex justify-between items-start mb-6">
-          <div className="flex items-center space-x-4">
-            <img
-              src={user?.avatar || '/default-avatar.png'}
-              alt="Profile"
-              className="w-20 h-20 rounded-full"
-            />
-            <div>
-              <h2 className="text-xl font-semibold">{user?.username}</h2>
-              <p className="text-gray-500">{user?.email}</p>
-            </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-            aria-label="Logout"
-          >
-            Logout
-          </button>
-        </div>
-
-        {editing ? (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Username</label>
-              <input
-                type="text"
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                className="w-full p-2 border rounded"
-                aria-label="Edit username"
-                disabled={updating}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Email</label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full p-2 border rounded"
-                aria-label="Edit email"
-                disabled={updating}
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={updating}
-              className="w-full bg-primary text-white py-2 rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="Save profile changes"
-            >
-              {updating ? 'Updating...' : 'Save'}
-            </button>
-          </form>
-        ) : (
-          <button
-            onClick={() => setEditing(true)}
-            className="text-sm text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="Edit profile"
-            disabled={updating}
-          >
-            Edit Profile
-          </button>
-        )}
       </div>
 
       {/* Participated Polls Section */}
