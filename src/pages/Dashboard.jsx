@@ -8,10 +8,20 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editing, setEditing] = useState(false);
+  const [notification, setNotification] = useState(null);
+  const [updating, setUpdating] = useState(false);
   const [formData, setFormData] = useState({
     username: user?.username || '',
     email: user?.email || '',
   });
+
+  useEffect(() => {
+    // Update form data when user changes
+    setFormData({
+      username: user?.username || '',
+      email: user?.email || '',
+    });
+  }, [user]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,8 +65,24 @@ function Dashboard() {
     }
   }, [user?.id]);
 
+  const clearNotification = () => {
+    setNotification(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check if data has changed
+    if (formData.username === user.username && formData.email === user.email) {
+      setNotification({
+        type: 'info',
+        message: 'No changes detected.'
+      });
+      setTimeout(() => setNotification(null), 2000);
+      return;
+    }
+    
+    setUpdating(true);
     try {
       const response = await fetch(`http://localhost:5000/users/${user.id}`, {
         method: 'PUT',
@@ -71,9 +97,29 @@ function Dashboard() {
         const updatedUser = await response.json();
         setUser(updatedUser);
         setEditing(false);
+        setNotification({
+          type: 'success',
+          message: 'Profile updated successfully!'
+        });
+        // Clear notification after 3 seconds
+        setTimeout(() => setNotification(null), 3000);
+      } else {
+        const errorData = await response.json();
+        setNotification({
+          type: 'error',
+          message: errorData.error || 'Failed to update profile'
+        });
+        setTimeout(() => setNotification(null), 5000);
       }
     } catch (error) {
       console.error('Error updating profile:', error);
+      setNotification({
+        type: 'error',
+        message: 'Network error. Please try again.'
+      });
+      setTimeout(() => setNotification(null), 5000);
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -90,6 +136,33 @@ function Dashboard() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+      
+      {/* Notification */}
+      {notification && (
+        <div className={`mb-6 p-4 rounded-lg relative ${
+          notification.type === 'success' 
+            ? 'bg-green-100 border border-green-400 text-green-700' 
+            : notification.type === 'error'
+            ? 'bg-red-100 border border-red-400 text-red-700'
+            : 'bg-blue-100 border border-blue-400 text-blue-700'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <span className="mr-2">
+                {notification.type === 'success' ? '✅' : notification.type === 'error' ? '❌' : 'ℹ️'}
+              </span>
+              <span>{notification.message}</span>
+            </div>
+            <button
+              onClick={clearNotification}
+              className="ml-4 text-gray-500 hover:text-gray-700"
+              aria-label="Close notification"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Points Card */}
@@ -171,10 +244,11 @@ function Dashboard() {
             </div>
             <button
               type="submit"
-              className="w-full bg-primary text-white py-2 rounded hover:bg-primary/90"
+              disabled={updating}
+              className="w-full bg-primary text-white py-2 rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Save profile changes"
             >
-              Save
+              {updating ? 'Updating...' : 'Save'}
             </button>
           </form>
         ) : (
