@@ -59,6 +59,13 @@ def get_transactions():
             '$or': [{'senderId': user_object_id}, {'receiverId': user_object_id}]
         }).sort('timestamp', -1))  # Sort by timestamp descending (newest first)
         
+        # Convert ObjectIds to strings for frontend consistency
+        for transaction in user_transactions:
+            transaction['id'] = str(transaction['_id'])
+            transaction['senderId'] = str(transaction['senderId'])
+            transaction['receiverId'] = str(transaction['receiverId'])
+            del transaction['_id']
+        
         return json.loads(json_util.dumps(user_transactions))
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -112,12 +119,23 @@ def create_transaction():
     try:
         transaction_data = request.json
         sender_id = ObjectId(transaction_data['senderId'])
-        receiver_id = ObjectId(transaction_data['receiverId'])
+        receiver_username = transaction_data['receiverUsername']
         amount = transaction_data['amount']
+
+        # Find receiver by username
+        receiver = users_collection.find_one({'username': receiver_username})
+        if not receiver:
+            return jsonify({'error': 'Recipient username not found'}), 404
+
+        receiver_id = receiver['_id']
 
         sender = users_collection.find_one({'_id': sender_id})
         if not sender or sender.get('points', 0) < amount:
             return jsonify({'error': 'Insufficient points or sender not found'}), 400
+
+        # Prevent self-transfer
+        if str(sender_id) == str(receiver_id):
+            return jsonify({'error': 'Cannot transfer points to yourself'}), 400
 
         users_collection.update_one({'_id': sender_id}, {'$inc': {'points': -amount}})
         users_collection.update_one({'_id': receiver_id}, {'$inc': {'points': amount}})
@@ -125,6 +143,8 @@ def create_transaction():
         new_transaction = {
             'senderId': sender_id,
             'receiverId': receiver_id,
+            'receiverUsername': receiver_username,
+            'senderUsername': sender.get('username', 'Unknown'),
             'amount': amount,
             'timestamp': (datetime.utcnow() + timedelta(hours=6)).isoformat()
         }

@@ -66,7 +66,7 @@ function Dashboard() {
     if (user?.id) {
       fetchData();
     }
-  }, [user?.id]);
+  }, [user?.id, user?.points]); // Added user?.points to dependency array to refetch when points change
 
   const clearNotification = () => {
     setNotification(null);
@@ -292,17 +292,24 @@ function Dashboard() {
           ) : error ? (
             <p className="text-red-500">{error}</p>
           ) : (
-            <div className="space-y-4">
-              {recentTransactions.map((transaction) => (
-                <div key={transaction.id} className="flex justify-between items-center">
-                  <span>
-                    {transaction.receiverId === user.id 
-                      ? `Transferred from User #${transaction.senderId}` 
-                      : `Sent to User #${transaction.receiverId}`}
-                  </span>
-                  <span className="font-semibold">{transaction.amount} points</span>
-                </div>
-              ))}
+            <div className="max-h-25 overflow-y-auto space-y-4 pr-4">
+              {recentTransactions.map((transaction) => {
+                const isReceiver = String(transaction.receiverId) === String(user.id);
+                return (
+                  <div key={transaction.id} className="flex justify-between items-center">
+                    <span>
+                      {isReceiver
+                        ? `Received from ${transaction.senderUsername || `User ${transaction.senderId}`}`
+                        : `Sent to ${transaction.receiverUsername || `User ${transaction.receiverId}`}`}
+                    </span>
+                    <span className={`font-semibold ${
+                      isReceiver ? 'text-green-500' : 'text-red-500'
+                    }`}>
+                      {isReceiver ? '+' : '-'}{transaction.amount} points
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

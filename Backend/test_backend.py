@@ -78,7 +78,7 @@ def test_update_user():
     assert response.json()['email'] == new_email
 
 def test_create_transaction():
-    global user_ids, transaction_ids
+    global user_ids, transaction_ids, user_data_for_login
     print("Testing POST /transactions")
     if len(user_ids) < 2:
         test_register_user() # Register another user if needed
@@ -88,9 +88,13 @@ def test_create_transaction():
     sender_id = user_ids[0]
     requests.put(f"{BASE_URL}/users/{sender_id}", json={"points": 100})
     
-    receiver_id = user_ids[1]
+    # Get receiver username
+    receiver_response = requests.get(f"{BASE_URL}/users/{user_ids[1]}")
+    receiver_data = receiver_response.json()
+    receiver_username = receiver_data['username']
+    
     amount = random.randint(1, 50)
-    data = {"senderId": sender_id, "receiverId": receiver_id, "amount": amount}
+    data = {"senderId": sender_id, "receiverUsername": receiver_username, "amount": amount}
     response = requests.post(f"{BASE_URL}/transactions", json=data)
     print(f"Create Transaction Response: {response.status_code} {response.json()}")
     assert response.status_code == 201

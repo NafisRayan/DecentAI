@@ -81,8 +81,29 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const refreshUser = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const response = await fetch(`http://localhost:5000/users/${user.id}`);
+      if (response.ok) {
+        const updatedUser = await response.json();
+        // Ensure _id is handled properly
+        if (updatedUser._id && typeof updatedUser._id === 'object' && updatedUser._id.$oid) {
+          updatedUser.id = updatedUser._id.$oid;
+          delete updatedUser._id;
+        }
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        return updatedUser;
+      }
+    } catch (error) {
+      console.error('Error refreshing user data:', error);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, setUser, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, setUser, login, register, logout, refreshUser, loading }}>
       {children}
     </AuthContext.Provider>
   );
