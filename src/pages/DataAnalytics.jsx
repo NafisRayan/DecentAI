@@ -89,6 +89,16 @@ function DataAnalytics() {
       return acc;
     }, {});
 
+    // Process user registrations by date
+    const userRegistrationsByDate = data.users.reduce((acc, user) => {
+      if (user.created_at) {
+        const date = new Date(user.created_at).toLocaleDateString();
+        if (!acc[date]) acc[date] = 0;
+        acc[date] += 1;
+      }
+      return acc;
+    }, {});
+
     const pollParticipation = data.polls.reduce((acc, poll) => {
       const totalVotes = poll.voters?.length || 0;
       acc['Participated'] += totalVotes;
@@ -126,6 +136,10 @@ function DataAnalytics() {
       transactionTrend: Object.entries(transactionsByDate).map(([date, amount]) => ({
         date,
         amount
+      })),
+      userRegistrations: Object.entries(userRegistrationsByDate).map(([date, count]) => ({
+        date,
+        count
       })),
       pollStats: Object.entries(pollParticipation).map(([name, value]) => ({
         name,
@@ -173,7 +187,7 @@ function DataAnalytics() {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Platform Analytics & Statistics</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-gray-500 text-sm">Total Users</h3>
           <p className="text-2xl font-bold">{stats.totalUsers}</p>
@@ -240,26 +254,23 @@ function DataAnalytics() {
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4">Poll Results Distribution</h2>
-          <div className="flex justify-center">
-            <PieChart width={300} height={300}>
-              <Pie
-                data={pollData}
-                cx={150}
-                cy={150}
-                labelLine={false}
-                label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="votes"
-              >
-                {pollData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
+          <h2 className="text-lg font-semibold mb-4">User Registration Trend</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={processedData?.userRegistrations}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
               <Tooltip />
-            </PieChart>
-          </div>
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="count"
+                stroke="#10b981"
+                activeDot={{ r: 8 }}
+                name="New Users"
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow">

@@ -275,6 +275,28 @@ def vote_poll(poll_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/polls/<poll_id>/toggle-active', methods=['POST'])
+def toggle_poll_active(poll_id):
+    try:
+        poll = polls_collection.find_one({'_id': ObjectId(poll_id)})
+        
+        if not poll:
+            return jsonify({'error': 'Poll not found'}), 404
+            
+        # Toggle the active status
+        new_active_status = not poll.get('active', True)
+        
+        polls_collection.update_one(
+            {'_id': ObjectId(poll_id)},
+            {'$set': {'active': new_active_status}}
+        )
+        
+        updated_poll = polls_collection.find_one({'_id': ObjectId(poll_id)})
+        updated_poll['id'] = str(updated_poll['_id'])
+        return json.loads(json_util.dumps(updated_poll))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # Chat routes
 @app.route('/chats', methods=['POST'])
 def create_message():
