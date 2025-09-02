@@ -35,9 +35,12 @@ admin_requests_collection = db.adminRequests
 @app.route('/users', methods=['GET'])
 def get_users():
     users = list(users_collection.find({}, {'password': 0}).sort('created_at', -1)) # Exclude password from results and sort by created_at descending
-    # Convert ObjectIds to strings for frontend consistency
+    # Convert ObjectIds to strings for frontend consistency and ensure points is numeric
     for user in users:
         user['id'] = str(user['_id'])
+        # Ensure points is always a number
+        if user.get('points') is None:
+            user['points'] = 0
         del user['_id']
     return json.loads(json_util.dumps(users))
 
@@ -109,6 +112,9 @@ def get_user(user_id):
     try:
         user = users_collection.find_one({'_id': ObjectId(user_id)}, {'password': 0})
         if user:
+            # Ensure points is always a number
+            if user.get('points') is None:
+                user['points'] = 0
             return json.loads(json_util.dumps(user))
         return jsonify({'error': 'User not found'}), 404
     except Exception as e:
@@ -130,8 +136,24 @@ def create_transaction():
         receiver_id = receiver['_id']
 
         sender = users_collection.find_one({'_id': sender_id})
-        if not sender or sender.get('points', 0) < amount:
-            return jsonify({'error': 'Insufficient points or sender not found'}), 400
+        if not sender:
+            return jsonify({'error': 'Sender not found'}), 404
+            
+        # Ensure sender has a valid points field
+        sender_points = sender.get('points', 0)
+        if sender_points is None:
+            sender_points = 0
+            # Initialize points field if it doesn't exist
+            users_collection.update_one({'_id': sender_id}, {'$set': {'points': 0}})
+            
+        if sender_points < amount:
+            return jsonify({'error': 'Insufficient points'}), 400
+
+        # Ensure receiver has a valid points field
+        receiver_points = receiver.get('points', 0)
+        if receiver_points is None:
+            # Initialize points field if it doesn't exist
+            users_collection.update_one({'_id': receiver_id}, {'$set': {'points': 0}})
 
         # Prevent self-transfer
         if str(sender_id) == str(receiver_id):
@@ -224,19 +246,55 @@ def logout():
 def update_user(user_id):
     try:
         user_data = request.json
-        result = users_collection.update_one(
-            {'_id': ObjectId(user_id)},
-            {'$set': {
-                'username': user_data.get('username'),
-                'email': user_data.get('email'),
-                'points': user_data.get('points'),
-                'is_admin': user_data.get('is_admin', False)
-            }}
+        
+        # Get current user to preserve existing values
+        current_user = users_collection.find_one({'_id': ObjectId(user_id)}, {'password': 0})
+        if not current_user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        update_data = {}
+        
+        # Only update fields that are provided
+        if 'username' in user_data:
+            update_data['username'] = user_data['username']
+        if 'email' in user_data:
+            update_data['email'] = user_data['email']
+        if 'points' in user_data:
+            update_data['points'] = user_data['points']
+        if 'is_admin' in user_data:
+            update_data['is_admin'] = user_data.get('is_admin', False)
+        
+        if update_data:
+            result = users_collection.update_one(
+                {'_id': ObjectId(user_id)},
+                {'$set': update_data}
+            )
+        
+        updated_user = users_collection.find_one({'_id': ObjectId(user_id)}, {'password': 0})
+        return json.loads(json_util.dumps(updated_user))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/fix-user-points', methods=['POST'])
+def fix_user_points():
+    """One-time fix to initialize points field for existing users"""
+    try:
+        # Update all users who have null or missing points field
+        result = users_collection.update_many(
+            {'points': {'$exists': False}},
+            {'$set': {'points': 0}}
         )
-        if result.matched_count:
-            updated_user = users_collection.find_one({'_id': ObjectId(user_id)}, {'password': 0})
-            return json.loads(json_util.dumps(updated_user))
-        return jsonify({'error': 'User not found'}), 404
+        
+        result_null = users_collection.update_many(
+            {'points': None},
+            {'$set': {'points': 0}}
+        )
+        
+        return jsonify({
+            'message': f'Fixed points for {result.modified_count + result_null.modified_count} users',
+            'users_without_points': result.modified_count,
+            'users_with_null_points': result_null.modified_count
+        }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
