@@ -1,10 +1,22 @@
 # DecentAI
 
-A modern web application built with React and Python backend for AI-powered community engagement, featuring real-time sentiment analysis, interactive polls, and intelligent chat capabilities.
+A modern web application built with React and Python backend for AI-powered community engagement, featuring real-time sentiment analysis, interactive polls, and intelligent chat capabilities with comprehensive admin management tools.
 
 ## 📋 Project Overview
 
-DecentAI is a comprehensive platform that leverages artificial intelligence to facilitate meaningful community interactions and policy discussions. The platform combines advanced NLP capabilities with modern web technologies to provide real-time sentiment analysis, interactive polling systems, and AI-powered chat functionality.
+DecentAI is a comprehensive platform that leverages artificial intelligence to facilitate meaningful community interactions and policy discussions. The platform combines advanced NLP capabilities with modern web technologies to provide real-time sentiment analysis, interactive polling systems, AI-powered chat functionality, and robust administrative controls.
+
+## Screenshots
+
+Here are some screenshots of the app showcasing its key features and design:
+
+<img src="public/dai1.png" alt="Home Screen" width="250" />
+
+<img src="public/dai2.png" alt="Polls" width="250" />
+
+<img src="public/dai3.png" alt="Surveys" width="250" />
+
+<img src="public/dai4.png" alt="Sentiment" width="250" />
 
 ## Screenshots
 
@@ -40,17 +52,19 @@ Here are some screenshots of the app showcasing its key features and design:
 - **Secure Data Storage**: MongoDB with proper data validation
 - **Session Management**: Secure session handling with Flask
 
-### 📈 Data Management
-- **MongoDB Integration**: NoSQL database for flexible data storage
-- **Real-time Data Visualization**: Interactive charts using Recharts
-- **Search & Filtering**: Advanced search across all data types
-- **Export Capabilities**: Data export functionality for analytics
+### � Administrative Controls
+- **User Management**: Complete user lifecycle management with cascading deletes
+- **Admin Request System**: Process admin access requests with approval/rejection workflow
+- **Content Moderation**: Delete individual admin requests, polls, and chat messages
+- **System Cleanup**: Clear all chat messages and manage platform content
+- **Audit Trail**: Track all administrative actions and changes
 
 ### 🎨 Modern UI/UX
 - **Responsive Design**: Mobile-first approach with Tailwind CSS
+- **Custom Modal System**: Professional confirmation dialogs replacing browser alerts
+- **Enhanced Notifications**: Color-coded success (green) and error (red) messages
+- **Accessibility**: WCAG compliant design with proper form attributes
 - **Dark/Light Theme Support**: Modern design system
-- **Interactive Components**: Smooth animations and transitions
-- **Accessibility**: WCAG compliant design patterns
 
 ## 🛠️ Technology Stack
 
@@ -60,6 +74,7 @@ Here are some screenshots of the app showcasing its key features and design:
 - **React Router** - Declarative routing for React
 - **Recharts** - Composable charting library
 - **HeroIcons** - Beautiful hand-crafted SVG icons
+- **Custom Modal System** - Professional confirmation dialogs
 - **Google Generative AI** - AI-powered content generation
 
 ### Backend
@@ -96,6 +111,26 @@ Here are some screenshots of the app showcasing its key features and design:
 - **Vote Tracking**: Secure voter tracking system
 - **Results Visualization**: Dynamic percentage bars and vote counts
 - **Search Integration**: Search through polls and their options
+
+### 👑 Administrative Management System
+- **User Lifecycle Management**: Complete user management with cascading data deletion
+- **Admin Request Processing**: Approve, reject, or delete individual admin requests
+- **Content Moderation**: Delete polls, users, and manage platform content
+- **Chat Management**: Clear all chat messages for system maintenance
+- **Audit & Control**: Comprehensive admin tools for platform management
+
+### 🎨 Custom Modal & Notification System
+- **Professional Modals**: Custom confirmation dialogs replacing browser alerts
+- **Color-Coded Notifications**: Green for success, red for errors
+- **Accessibility Compliance**: WCAG compliant with proper form attributes
+- **Enhanced UX**: Better user experience with modern dialog design
+- **Keyboard Navigation**: Full keyboard support and screen reader compatibility
+
+### 🛡️ Data Integrity & Security
+- **Cascading Deletes**: Automatic cleanup of all related user data
+- **Secure Deletions**: Confirmation dialogs prevent accidental data loss
+- **Audit Trail**: Track all administrative actions
+- **Data Validation**: Comprehensive input validation and sanitization
 
 ### 💬 AI Chat System
 - **Gemini AI Integration**: Powered by Google's Gemini 1.5 Flash model
@@ -234,7 +269,10 @@ DecentAI/
 ├── src/                   # Frontend React application
 │   ├── components/        # Reusable UI components
 │   │   ├── Layout/       # Layout components
+│   │   │   ├── Layout.jsx
+│   │   │   ├── Sidebar.jsx
 │   │   └── ui/           # UI components
+│   │       └── Modal.jsx # Custom modal system
 │   ├── contexts/         # React contexts
 │   │   ├── AuthContext.jsx
 │   │   └── model_artifacts.json
@@ -246,12 +284,12 @@ DecentAI/
 │   │   ├── LoginRegister.jsx # Authentication
 │   │   ├── Polls.jsx     # Polling system
 │   │   ├── SentimentAnalysis.jsx # Sentiment analysis
-│   │   └── UserSettings.jsx # User settings
+│   │   └── UserSettings.jsx # User settings & admin panel
 │   ├── App.jsx           # Main app component
 │   ├── index.js          # App entry point
 │   └── setupTests.js     # Test setup
 ├── Backend/              # Python Flask backend
-│   ├── app.py           # Main Flask application
+│   ├── app.py           # Main Flask application with admin endpoints
 │   ├── requirements.txt # Python dependencies
 │   ├── test_backend.py  # Backend tests
 │   └── venv/            # Virtual environment
@@ -260,7 +298,33 @@ DecentAI/
 └── README.md           # Project documentation
 ```
 
-## 🛠️ Built With
+## 🆕 Recent Updates & Improvements
+
+### v2.0.0 - Enhanced Admin & Accessibility Features
+
+#### 🎨 UI/UX Enhancements
+- **Custom Modal System**: Replaced browser `window.confirm()` with professional, accessible modal dialogs
+- **Enhanced Notifications**: Color-coded success (green) and error (red) messages throughout the app
+- **Accessibility Compliance**: Fixed form attributes, added proper ARIA labels, and improved keyboard navigation
+- **Responsive Design**: Improved mobile experience and cross-device compatibility
+
+#### � Administrative Features
+- **Cascading User Deletion**: Complete data cleanup when deleting users (removes transactions, chats, polls, admin requests, analysis history)
+- **Individual Admin Request Management**: Delete specific admin requests with confirmation dialogs
+- **Chat Management**: Admin-only feature to clear all chat messages for system maintenance
+- **Enhanced Admin Panel**: Improved user management interface with better search and filtering
+
+#### 🔧 Backend Improvements
+- **New API Endpoints**: Added comprehensive admin operations endpoints
+- **Data Integrity**: Cascading delete operations ensure no orphaned data
+- **Error Handling**: Enhanced error responses and validation
+- **Security**: Improved data validation and secure deletion operations
+
+#### 📱 Frontend Enhancements
+- **Modal Component Library**: Reusable modal system for consistent user interactions
+- **State Management**: Improved state handling for admin operations
+- **Real-time Updates**: Automatic data refresh after admin operations
+- **Loading States**: Better user feedback during operations
 
 ### Frontend Technologies
 - **[React 18](https://reactjs.org/)** - Modern JavaScript library for building user interfaces
@@ -287,9 +351,9 @@ DecentAI/
 ## 🔌 API Endpoints
 
 ### Authentication
-- `POST /register` - User registration
-- `POST /login` - User login
-- `GET /logout` - User logout
+- `POST /auth/register` - User registration
+- `POST /auth/login` - User login
+- `POST /auth/logout` - User logout
 
 ### Data Management
 - `GET /users` - Get all users
@@ -299,6 +363,16 @@ DecentAI/
 - `POST /polls` - Create new poll
 - `POST /polls/<poll_id>/vote` - Vote on a poll
 - `GET /transactions` - Get all transactions
+
+### Administrative Operations
+- `GET /admin-requests` - Get all admin requests
+- `POST /admin-requests` - Submit admin request
+- `POST /admin-requests/<request_id>/approve` - Approve admin request
+- `POST /admin-requests/<request_id>/reject` - Reject admin request
+- `DELETE /admin/delete-admin-request/<request_id>` - Delete admin request
+- `DELETE /admin/delete-user/<user_id>` - Delete user (with cascading cleanup)
+- `DELETE /admin/delete-poll/<poll_id>` - Delete poll
+- `DELETE /admin/clear-chats` - Clear all chat messages
 
 ### AI & Analysis
 - `GET /analysis-history` - Get sentiment analysis history
@@ -328,11 +402,32 @@ gunicorn --bind 0.0.0.0:5000 app:app
 
 ## 🙏 Acknowledgments
 
-- Google Generative AI for providing powerful AI capabilities
-- The React and Flask communities for excellent documentation
-- MongoDB for reliable database solutions
-- Tailwind CSS for beautiful, responsive design utilities
+- **Google Generative AI** for providing powerful AI capabilities
+- **The React and Flask communities** for excellent documentation and support
+- **MongoDB** for reliable database solutions and comprehensive documentation
+- **Tailwind CSS** for beautiful, responsive design utilities
+- **HeroIcons** for consistent and professional iconography
+- **Open source contributors** for accessibility tools and best practices
+- **Web accessibility community** for WCAG guidelines and inclusive design principles
 
 ---
 
-**DecentAI** - Empowering communities through AI-driven engagement and intelligent analysis.
+## 📈 Version History
+
+### v2.0.0 (Latest)
+- ✅ **Custom Modal System**: Professional confirmation dialogs
+- ✅ **Enhanced Admin Panel**: Complete user and content management
+- ✅ **Cascading Deletes**: Comprehensive data cleanup operations
+- ✅ **Accessibility Compliance**: WCAG compliant form attributes
+- ✅ **Color-coded Notifications**: Green success, red error messages
+- ✅ **Admin Request Management**: Individual request deletion
+- ✅ **Chat Management**: Admin-only chat clearing functionality
+
+### v1.0.0
+- ✅ Initial release with AI chat, sentiment analysis, and polling
+- ✅ Basic user authentication and dashboard
+- ✅ Real-time data visualization and analytics
+
+---
+
+**DecentAI** - Empowering communities through AI-driven engagement, intelligent analysis, and comprehensive administrative controls.
