@@ -15,7 +15,9 @@ function Chat() {
       try {
         const response = await fetch('http://localhost:5000/chats');
         const data = await response.json();
-        setMessages(data);
+        // Sort messages by timestamp (oldest first for chat display)
+        const sortedMessages = data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        setMessages(sortedMessages);
       } catch (error) {
         console.error('Error fetching messages:', error);
       }
@@ -128,7 +130,11 @@ function Chat() {
 
       if (response.ok) {
         const newMsg = await response.json();
-        setMessages(prev => [...prev, newMsg]);
+        setMessages(prev => {
+          const updatedMessages = [...prev, newMsg];
+          // Sort messages by timestamp (oldest first for chat display)
+          return updatedMessages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        });
         setNewMessage('');
       } else {
         console.error('Failed to send message:', response.statusText);
