@@ -457,6 +457,17 @@ def delete_poll(poll_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/admin/delete-admin-request/<request_id>', methods=['DELETE'])
+def delete_admin_request(request_id):
+    try:
+        result = admin_requests_collection.delete_one({'_id': ObjectId(request_id)})
+        
+        if result.deleted_count:
+            return jsonify({'message': 'Admin request deleted successfully'}), 200
+        return jsonify({'error': 'Admin request not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # Admin Request Routes
 @app.route('/admin-requests', methods=['POST'])
 def create_admin_request():

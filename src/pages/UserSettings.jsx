@@ -17,8 +17,10 @@ function UserSettings() {
   const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
   const [showDeletePollModal, setShowDeletePollModal] = useState(false);
   const [showClearChatsModal, setShowClearChatsModal] = useState(false);
+  const [showDeleteAdminRequestModal, setShowDeleteAdminRequestModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedPollId, setSelectedPollId] = useState(null);
+  const [selectedAdminRequestId, setSelectedAdminRequestId] = useState(null);
 
   const fetchAdminData = useCallback(async () => {
     try {
@@ -274,6 +276,33 @@ function UserSettings() {
     setShowClearChatsModal(false);
   };
 
+  const handleDeleteAdminRequest = (requestId) => {
+    setSelectedAdminRequestId(requestId);
+    setShowDeleteAdminRequestModal(true);
+  };
+
+  const confirmDeleteAdminRequest = async () => {
+    if (!selectedAdminRequestId) return;
+
+    try {
+      const response = await fetch(`http://localhost:5000/admin/delete-admin-request/${selectedAdminRequestId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        setNotification({ type: 'success', message: 'Admin request deleted successfully!' });
+        fetchAdminData(); // Refresh data to reflect changes
+      } else {
+        setNotification({ type: 'error', message: 'Failed to delete admin request' });
+      }
+    } catch (error) {
+      setNotification({ type: 'error', message: 'Network error' });
+    }
+    setTimeout(() => setNotification(null), 3000);
+    setShowDeleteAdminRequestModal(false);
+    setSelectedAdminRequestId(null);
+  };
+
   if (!user) {
     return <div className="p-6">Loading...</div>;
   }
@@ -409,6 +438,13 @@ function UserSettings() {
                                   </button>
                                 </>
                               )}
+                              <button
+                                onClick={() => handleDeleteAdminRequest(request.id)}
+                                className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm"
+                                title="Delete this admin request"
+                              >
+                                Delete
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -555,6 +591,22 @@ function UserSettings() {
               })()}
             </div>
           </div>
+
+          {/* Chat Management */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">Chat Management</h2>
+            <div className="space-y-4">
+              <p className="text-gray-600">
+                Clear all chat messages from the chat room. This action cannot be undone.
+              </p>
+              <button
+                onClick={handleClearChats}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Clear All Chat Messages
+              </button>
+            </div>
+          </div>
         </div>
       ) : (
         // Regular User Settings
@@ -613,22 +665,6 @@ function UserSettings() {
                 </button>
               </div>
             )}
-          </div>
-
-          {/* Chat Management */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">Chat Management</h2>
-            <div className="space-y-4">
-              <p className="text-gray-600">
-                Clear all chat messages from the chat room. This action cannot be undone.
-              </p>
-              <button
-                onClick={handleClearChats}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-              >
-                Clear All Chat Messages
-              </button>
-            </div>
           </div>
 
           {/* Personal Information */}
@@ -728,6 +764,21 @@ function UserSettings() {
         confirmText="Clear All Messages"
         cancelText="Cancel"
         onConfirm={confirmClearChats}
+        type="danger"
+      />
+
+      {/* Delete Admin Request Confirmation Modal */}
+      <Modal
+        isOpen={showDeleteAdminRequestModal}
+        onClose={() => {
+          setShowDeleteAdminRequestModal(false);
+          setSelectedAdminRequestId(null);
+        }}
+        title="Delete Admin Request"
+        message="Are you sure you want to delete this admin request? This action cannot be undone and the request will be permanently removed."
+        confirmText="Delete Request"
+        cancelText="Cancel"
+        onConfirm={confirmDeleteAdminRequest}
         type="danger"
       />
     </div>
