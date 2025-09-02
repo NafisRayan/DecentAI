@@ -10,12 +10,16 @@ DecentAI is a comprehensive platform that leverages artificial intelligence to f
 
 Here's a full demonstration of DecentAI showcasing all key features:
 
-<video width="100%" controls>
-  <source src="public/Full Demo.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+🎬 **[Watch Full Demo Video](public/Full%20Demo.mp4)**
 
-*Click play to see DecentAI in action!*
+*Click the link above to download and watch the complete demonstration of DecentAI's features, including:*
+- 💰 Currency points system with transaction management
+- 🤖 AI-powered sentiment analysis and chat
+- 📊 Interactive polls and data analytics
+- 👑 Administrative controls and user management
+- 🎨 Modern responsive UI/UX
+
+> **Note:** The video file is included in the repository. Click the link above to download and play it locally.
 
 ## 🚀 Core Features
 
