@@ -6,29 +6,16 @@ A modern web application built with React and Python backend for AI-powered comm
 
 DecentAI is a comprehensive platform that leverages artificial intelligence to facilitate meaningful community interactions and policy discussions. The platform combines advanced NLP capabilities with modern web technologies to provide real-time sentiment analysis, interactive polling systems, AI-powered chat functionality, a robust currency points system with secure transactions, and comprehensive administrative controls.
 
-## Screenshots
+## 🎥 Demo Video
 
-Here are some screenshots of the app showcasing its key features and design:
+Here's a full demonstration of DecentAI showcasing all key features:
 
-<img src="public/dai1.png" alt="Home Screen" width="250" />
+<video width="100%" controls>
+  <source src="public/Full Demo.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
-<img src="public/dai2.png" alt="Polls" width="250" />
-
-<img src="public/dai3.png" alt="Surveys" width="250" />
-
-<img src="public/dai4.png" alt="Sentiment" width="250" />
-
-## Screenshots
-
-Here are some screenshots of the app showcasing its key features and design:
-
-<img src="public/dai1.png" alt="Home Screen" width="250" />
-
-<img src="public/dai2.png" alt="Polls" width="250" />
-
-<img src="public/dai3.png" alt="Surveys" width="250" />
-
-<img src="public/dai4.png" alt="Sentiment" width="250" />
+*Click play to see DecentAI in action!*
 
 ## 🚀 Core Features
 
