@@ -138,11 +138,14 @@ function Polls() {
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <input
+              id="polls-search"
+              name="searchTerm"
               type="text"
               placeholder="Search polls..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              aria-label="Search polls"
             />
             {searchTerm && (
               <button
@@ -173,18 +176,27 @@ function Polls() {
         <div className="bg-white p-6 rounded-lg shadow mb-6">
           <h2 className="text-lg font-semibold mb-4">Create New Poll</h2>
           <form onSubmit={handleCreatePoll}>
-            <input
-              type="text"
-              value={newPoll.title}
-              onChange={(e) => setNewPoll(prev => ({ ...prev, title: e.target.value }))}
-              placeholder="Poll Question"
-              className="w-full p-2 border rounded mb-4"
-            />
+            <div className="mb-4">
+              <label htmlFor="poll-title" className="block text-sm font-medium mb-2">Poll Question</label>
+              <input
+                id="poll-title"
+                name="title"
+                type="text"
+                value={newPoll.title}
+                onChange={(e) => setNewPoll(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Enter your poll question..."
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-primary focus:border-transparent"
+                required
+              />
+            </div>
             
             <div className="space-y-2 mb-4">
+              <label className="block text-sm font-medium mb-2">Poll Options</label>
               {newPoll.options.map((option, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <input
+                    id={`poll-option-${index}`}
+                    name={`option-${index}`}
                     type="text"
                     value={option}
                     onChange={(e) => setNewPoll(prev => ({
@@ -192,7 +204,8 @@ function Polls() {
                       options: prev.options.map((opt, i) => i === index ? e.target.value : opt)
                     }))}
                     placeholder={`Option ${index + 1}`}
-                    className="flex-1 p-2 border rounded"
+                    className="flex-1 p-2 border rounded focus:ring-2 focus:ring-primary focus:border-transparent"
+                    required
                   />
                   {index > 1 && (
                     <button

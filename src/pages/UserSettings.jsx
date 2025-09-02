@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import Modal from '../components/ui/Modal';
 
 function UserSettings() {
   const { user } = useAuth();
@@ -13,6 +14,11 @@ function UserSettings() {
   const [adminRequestsSearch, setAdminRequestsSearch] = useState('');
   const [usersSearch, setUsersSearch] = useState('');
   const [pollsSearch, setPollsSearch] = useState('');
+  const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
+  const [showDeletePollModal, setShowDeletePollModal] = useState(false);
+  const [showClearChatsModal, setShowClearChatsModal] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [selectedPollId, setSelectedPollId] = useState(null);
 
   const fetchAdminData = useCallback(async () => {
     try {
@@ -190,13 +196,16 @@ function UserSettings() {
     setTimeout(() => setNotification(null), 3000);
   };
 
-  const handleDeleteUser = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-      return;
-    }
+  const handleDeleteUser = (userId) => {
+    setSelectedUserId(userId);
+    setShowDeleteUserModal(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!selectedUserId) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/admin/delete-user/${userId}`, {
+      const response = await fetch(`http://localhost:5000/admin/delete-user/${selectedUserId}`, {
         method: 'DELETE'
       });
 
@@ -210,15 +219,20 @@ function UserSettings() {
       setNotification({ type: 'error', message: 'Network error' });
     }
     setTimeout(() => setNotification(null), 3000);
+    setShowDeleteUserModal(false);
+    setSelectedUserId(null);
   };
 
-  const handleDeletePoll = async (pollId) => {
-    if (!window.confirm('Are you sure you want to delete this poll? This action cannot be undone.')) {
-      return;
-    }
+  const handleDeletePoll = (pollId) => {
+    setSelectedPollId(pollId);
+    setShowDeletePollModal(true);
+  };
+
+  const confirmDeletePoll = async () => {
+    if (!selectedPollId) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/admin/delete-poll/${pollId}`, {
+      const response = await fetch(`http://localhost:5000/admin/delete-poll/${selectedPollId}`, {
         method: 'DELETE'
       });
 
@@ -232,6 +246,32 @@ function UserSettings() {
       setNotification({ type: 'error', message: 'Network error' });
     }
     setTimeout(() => setNotification(null), 3000);
+    setShowDeletePollModal(false);
+    setSelectedPollId(null);
+  };
+
+  const handleClearChats = () => {
+    setShowClearChatsModal(true);
+  };
+
+  const confirmClearChats = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/admin/clear-chats', {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setNotification({ type: 'success', message: data.message });
+        fetchAdminData(); // Refresh data to reflect changes
+      } else {
+        setNotification({ type: 'error', message: 'Failed to clear chat messages' });
+      }
+    } catch (error) {
+      setNotification({ type: 'error', message: 'Network error' });
+    }
+    setTimeout(() => setNotification(null), 3000);
+    setShowClearChatsModal(false);
   };
 
   if (!user) {
@@ -281,10 +321,13 @@ function UserSettings() {
               {/* Search Bar */}
               <input
                 type="text"
+                id="admin-requests-search"
+                name="adminRequestsSearch"
                 placeholder="Search by username, email, or reason..."
                 value={adminRequestsSearch}
                 onChange={(e) => setAdminRequestsSearch(e.target.value)}
                 className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Search admin requests"
               />
             </div>
             
@@ -386,10 +429,13 @@ function UserSettings() {
               {/* Search Bar */}
               <input
                 type="text"
+                id="users-search"
+                name="usersSearch"
                 placeholder="Search by username or email..."
                 value={usersSearch}
                 onChange={(e) => setUsersSearch(e.target.value)}
                 className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Search users"
               />
             </div>
             
@@ -458,10 +504,13 @@ function UserSettings() {
               {/* Search Bar */}
               <input
                 type="text"
+                id="polls-search"
+                name="pollsSearch"
                 placeholder="Search by poll title..."
                 value={pollsSearch}
                 onChange={(e) => setPollsSearch(e.target.value)}
                 className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Search polls"
               />
             </div>
             
@@ -542,14 +591,18 @@ function UserSettings() {
                   You are not an admin. Request admin access to manage users and polls.
                 </p>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Reason for Request</label>
+                  <label htmlFor="admin-request-reason" className="block text-sm font-medium mb-2">Reason for Request</label>
                   <textarea
+                    id="admin-request-reason"
+                    name="requestReason"
                     value={requestReason}
                     onChange={(e) => setRequestReason(e.target.value)}
                     placeholder="Please explain why you need admin access..."
                     className="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     rows="3"
+                    aria-describedby="admin-request-help"
                   />
+                  <p id="admin-request-help" className="text-xs text-gray-500 mt-1">Provide a clear reason for your admin access request</p>
                 </div>
                 <button
                   onClick={handleAdminRequest}
@@ -560,6 +613,22 @@ function UserSettings() {
                 </button>
               </div>
             )}
+          </div>
+
+          {/* Chat Management */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">Chat Management</h2>
+            <div className="space-y-4">
+              <p className="text-gray-600">
+                Clear all chat messages from the chat room. This action cannot be undone.
+              </p>
+              <button
+                onClick={handleClearChats}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Clear All Chat Messages
+              </button>
+            </div>
           </div>
 
           {/* Personal Information */}
@@ -619,6 +688,48 @@ function UserSettings() {
           </div>
         </div>
       )}
+
+      {/* Delete User Confirmation Modal */}
+      <Modal
+        isOpen={showDeleteUserModal}
+        onClose={() => {
+          setShowDeleteUserModal(false);
+          setSelectedUserId(null);
+        }}
+        title="Delete User"
+        message="Are you sure you want to delete this user? This action cannot be undone and all user data will be permanently removed."
+        confirmText="Delete User"
+        cancelText="Cancel"
+        onConfirm={confirmDeleteUser}
+        type="danger"
+      />
+
+      {/* Delete Poll Confirmation Modal */}
+      <Modal
+        isOpen={showDeletePollModal}
+        onClose={() => {
+          setShowDeletePollModal(false);
+          setSelectedPollId(null);
+        }}
+        title="Delete Poll"
+        message="Are you sure you want to delete this poll? This action cannot be undone and all poll data including votes will be permanently removed."
+        confirmText="Delete Poll"
+        cancelText="Cancel"
+        onConfirm={confirmDeletePoll}
+        type="danger"
+      />
+
+      {/* Clear Chats Confirmation Modal */}
+      <Modal
+        isOpen={showClearChatsModal}
+        onClose={() => setShowClearChatsModal(false)}
+        title="Clear All Chat Messages"
+        message="Are you sure you want to clear all chat messages? This action cannot be undone and all chat history will be permanently deleted."
+        confirmText="Clear All Messages"
+        cancelText="Cancel"
+        onConfirm={confirmClearChats}
+        type="danger"
+      />
     </div>
   );
 }

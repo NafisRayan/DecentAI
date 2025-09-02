@@ -232,12 +232,15 @@ function Chat() {
               <FaMicrophone />
             </button>
             <input
+              id="chat-message-input"
+              name="message"
               type="text"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               disabled={!user || loading}
-              className="flex-1 p-2 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 p-2 border rounded disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder={loading ? "Loading..." : user ? "Type a message..." : "Please log in to chat"}
+              aria-label="Chat message input"
             />
             <button
               type="submit"

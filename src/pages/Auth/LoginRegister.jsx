@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 function LoginRegister() {
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const navigate = useNavigate();
   const { login, register } = useAuth();
 
@@ -18,6 +19,7 @@ function LoginRegister() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
     try {
       if (isLogin) {
@@ -40,7 +42,14 @@ function LoginRegister() {
         });
         if (registrationData) {
           setIsLogin(true);
-          setError('Registration successful! Please login.');
+          setSuccess('Registration successful! Please login.');
+          // Clear form
+          setFormData({
+            username: '',
+            email: '',
+            password: '',
+            confirmPassword: ''
+          });
         }
       }
     } catch (error) {
@@ -59,7 +68,13 @@ function LoginRegister() {
         
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-            {error}
+            ❌ {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+            ✅ {success}
           </div>
         )}
 
@@ -106,6 +121,7 @@ function LoginRegister() {
                 placeholder="Password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                autoComplete={isLogin ? "current-password" : "new-password"}
               />
             </div>
 
@@ -121,6 +137,7 @@ function LoginRegister() {
                   placeholder="Confirm Password"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  autoComplete="new-password"
                 />
               </div>
             )}

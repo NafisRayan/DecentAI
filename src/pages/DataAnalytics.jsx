@@ -280,11 +280,14 @@ function DataAnalytics() {
           <h2 className="text-lg font-semibold">Chat Messages</h2>
           <div className="flex items-center space-x-2">
             <input
+              id="chats-search"
+              name="chatsSearch"
               type="text"
               placeholder="Search chats..."
               value={searchTerms.chats}
               onChange={(e) => setSearchTerms(prev => ({ ...prev, chats: e.target.value }))}
               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              aria-label="Search chat messages"
             />
             {searchTerms.chats && (
               <button
@@ -348,11 +351,14 @@ function DataAnalytics() {
           <h2 className="text-lg font-semibold">Registered Users</h2>
           <div className="flex items-center space-x-2">
             <input
+              id="users-search"
+              name="usersSearch"
               type="text"
               placeholder="Search users..."
               value={searchTerms.users}
               onChange={(e) => setSearchTerms(prev => ({ ...prev, users: e.target.value }))}
               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              aria-label="Search users"
             />
             {searchTerms.users && (
               <button

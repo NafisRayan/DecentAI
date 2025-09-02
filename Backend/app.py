@@ -296,6 +296,22 @@ def create_message():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/admin/clear-chats', methods=['DELETE'])
+def clear_all_chats():
+    try:
+        # Get count before deletion for response
+        chat_count = chats_collection.count_documents({})
+
+        # Delete all chat messages
+        result = chats_collection.delete_many({})
+
+        return jsonify({
+            'message': f'Successfully cleared {chat_count} chat messages',
+            'deleted_count': chat_count
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/analysis-history', methods=['POST'])
 def save_analysis_history():
     try:
@@ -388,15 +404,45 @@ def remove_admin():
 @app.route('/admin/delete-user/<user_id>', methods=['DELETE'])
 def delete_user(user_id):
     try:
+        # First, get the user to check if they exist
+        user = users_collection.find_one({'_id': ObjectId(user_id)})
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        # Delete all related data in cascade
+        # 1. Delete user's transactions (both as sender and receiver)
+        transactions_collection.delete_many({
+            '$or': [{'senderId': ObjectId(user_id)}, {'receiverId': ObjectId(user_id)}]
+        })
+
+        # 2. Delete user's chat messages
+        chats_collection.delete_many({'userId': ObjectId(user_id)})
+
+        # 3. Delete polls created by the user
+        polls_collection.delete_many({'creatorId': ObjectId(user_id)})
+
+        # 4. Delete admin requests from the user
+        admin_requests_collection.delete_many({'user_id': ObjectId(user_id)})
+
+        # 5. Delete analysis history from the user
+        analysis_history_collection.delete_many({'userId': ObjectId(user_id)})
+
+        # 6. Finally, delete the user
         result = users_collection.delete_one({'_id': ObjectId(user_id)})
-        
+
         if result.deleted_count:
-            # Also delete user's transactions
-            transactions_collection.delete_many({
-                '$or': [{'senderId': ObjectId(user_id)}, {'receiverId': ObjectId(user_id)}]
-            })
-            return jsonify({'message': 'User deleted successfully'}), 200
-        return jsonify({'error': 'User not found'}), 404
+            return jsonify({
+                'message': 'User and all related data deleted successfully',
+                'deleted_data': {
+                    'user': 1,
+                    'transactions': 'all related',
+                    'chat_messages': 'all related',
+                    'polls': 'all created by user',
+                    'admin_requests': 'all related',
+                    'analysis_history': 'all related'
+                }
+            }), 200
+        return jsonify({'error': 'Failed to delete user'}), 500
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
