@@ -252,6 +252,28 @@ function UserSettings() {
     setSelectedPollId(null);
   };
 
+  const handleTogglePollActive = async (pollId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/polls/${pollId}/toggle-active`, {
+        method: 'POST'
+      });
+
+      if (response.ok) {
+        const updatedPoll = await response.json();
+        setNotification({ 
+          type: 'success', 
+          message: `Poll ${updatedPoll.active ? 'activated' : 'deactivated'} successfully!` 
+        });
+        fetchAdminData(); // Refresh data to reflect changes
+      } else {
+        setNotification({ type: 'error', message: 'Failed to toggle poll status' });
+      }
+    } catch (error) {
+      setNotification({ type: 'error', message: 'Network error' });
+    }
+    setTimeout(() => setNotification(null), 3000);
+  };
+
   const handleClearChats = () => {
     setShowClearChatsModal(true);
   };
@@ -571,15 +593,30 @@ function UserSettings() {
                               Created: {new Date(poll.created_at).toLocaleDateString()}
                             </p>
                             <p className="text-sm text-gray-600">
-                              Status: {poll.active ? 'Active' : 'Inactive'}
+                              Status: <span className={`font-medium ${poll.active ? 'text-green-600' : 'text-red-600'}`}>
+                                {poll.active ? 'Active' : 'Inactive'}
+                              </span>
                             </p>
                           </div>
-                          <button
-                            onClick={() => handleDeletePoll(poll.id)}
-                            className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
-                          >
-                            Delete Poll
-                          </button>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => handleTogglePollActive(poll.id)}
+                              className={`px-3 py-1 text-white rounded hover:opacity-80 text-sm ${
+                                poll.active 
+                                  ? 'bg-yellow-500 hover:bg-yellow-600' 
+                                  : 'bg-green-500 hover:bg-green-600'
+                              }`}
+                              title={poll.active ? 'Deactivate poll' : 'Activate poll'}
+                            >
+                              {poll.active ? 'Deactivate' : 'Activate'}
+                            </button>
+                            <button
+                              onClick={() => handleDeletePoll(poll.id)}
+                              className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+                            >
+                              Delete Poll
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
