@@ -30,7 +30,7 @@ function Dashboard() {
         // Fetch transactions
         const transactionsResponse = await fetch(`http://localhost:5000/transactions?userId=${user.id}`);
         const transactionsData = await transactionsResponse.json();
-        setRecentTransactions(transactionsData.slice(-5).reverse());
+        setRecentTransactions(transactionsData.slice(0, 5));  // Take first 5 (already sorted newest first from backend)
 
         // Fetch all polls and filter participated ones
         const pollsResponse = await fetch('http://localhost:5000/polls');
@@ -53,7 +53,7 @@ function Dashboard() {
         
         console.log('Filtered participated polls:', userParticipatedPolls);
         
-        setParticipatedPolls(userParticipatedPolls.reverse()); // Show all participated polls, most recent first
+        setParticipatedPolls(userParticipatedPolls); // Already sorted newest first from backend
       } catch (error) {
         setError('Failed to fetch data. Please try again later.');
       } finally {

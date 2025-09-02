@@ -46,7 +46,7 @@ function Polls() {
 
       if (response.ok) {
         const data = await response.json();
-        setPolls(prev => [...prev, data]);
+        setPolls(prev => [data, ...prev]);  // Add new poll at the beginning (newest first)
         setNewPoll({ title: '', options: ['', ''] });
         setShowCreateModal(false);
         setError('');

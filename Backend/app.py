@@ -34,7 +34,7 @@ admin_requests_collection = db.adminRequests
 
 @app.route('/users', methods=['GET'])
 def get_users():
-    users = list(users_collection.find({}, {'password': 0})) # Exclude password from results
+    users = list(users_collection.find({}, {'password': 0}).sort('created_at', -1)) # Exclude password from results and sort by created_at descending
     # Convert ObjectIds to strings for frontend consistency
     for user in users:
         user['id'] = str(user['_id'])
@@ -57,7 +57,7 @@ def get_transactions():
         # Filter transactions where user is either sender or receiver
         user_transactions = list(transactions_collection.find({
             '$or': [{'senderId': user_object_id}, {'receiverId': user_object_id}]
-        }))
+        }).sort('timestamp', -1))  # Sort by timestamp descending (newest first)
         
         return json.loads(json_util.dumps(user_transactions))
     except Exception as e:
@@ -65,7 +65,7 @@ def get_transactions():
 
 @app.route('/chats', methods=['GET'])
 def get_chats():
-    chats = list(chats_collection.find({}))
+    chats = list(chats_collection.find({}).sort('timestamp', -1))  # Sort by timestamp descending (newest first)
     # Convert ObjectIds to strings for frontend consistency
     for chat in chats:
         chat['id'] = str(chat['_id'])
@@ -75,7 +75,7 @@ def get_chats():
 
 @app.route('/polls', methods=['GET'])
 def get_polls():
-    polls = list(polls_collection.find({}))
+    polls = list(polls_collection.find({}).sort('created_at', -1))  # Sort by created_at descending (newest first)
     for poll in polls:
         poll['id'] = str(poll['_id'])
         # Convert ObjectIds in voters array to strings for frontend consistency
@@ -316,7 +316,7 @@ def save_analysis_history():
 @app.route('/analysis-history', methods=['GET'])
 def get_analysis_history():
     try:
-        history = list(analysis_history_collection.find({}))
+        history = list(analysis_history_collection.find({}).sort('timestamp', -1))  # Sort by timestamp descending (newest first)
         for item in history:
             item['id'] = str(item['_id'])
         return json.loads(json_util.dumps(history))
@@ -335,7 +335,7 @@ def clear_analysis_history():
 @app.route('/analytics/transactions', methods=['GET'])
 def get_all_transactions():
     try:
-        transactions = list(transactions_collection.find({}))
+        transactions = list(transactions_collection.find({}).sort('timestamp', -1))  # Sort by timestamp descending (newest first)
         for transaction in transactions:
             transaction['id'] = str(transaction['_id'])
             transaction['senderId'] = str(transaction['senderId'])
@@ -447,7 +447,7 @@ def create_admin_request():
 @app.route('/admin-requests', methods=['GET'])
 def get_admin_requests():
     try:
-        requests = list(admin_requests_collection.find({}))
+        requests = list(admin_requests_collection.find({}).sort('created_at', -1))  # Sort by created_at descending
         for request_item in requests:
             request_item['id'] = str(request_item['_id'])
             del request_item['_id']
