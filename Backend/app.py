@@ -492,6 +492,40 @@ def reject_admin_request(request_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/admin-requests/<request_id>/reapply', methods=['POST'])
+def reapply_admin_request(request_id):
+    try:
+        # Get the existing request
+        existing_request = admin_requests_collection.find_one({'_id': ObjectId(request_id)})
+        if not existing_request:
+            return jsonify({'error': 'Request not found'}), 404
+            
+        # Check if user already has a pending request
+        pending_request = admin_requests_collection.find_one({
+            'user_id': existing_request['user_id'],
+            'status': 'pending'
+        })
+        
+        if pending_request:
+            return jsonify({'error': 'You already have a pending admin request'}), 400
+            
+        # Create new request with updated reason if provided
+        data = request.json or {}
+        new_reason = data.get('reason', existing_request.get('reason', ''))
+        
+        new_request = {
+            'user_id': existing_request['user_id'],
+            'reason': new_reason,
+            'status': 'pending',
+            'created_at': (datetime.utcnow() + timedelta(hours=6)).isoformat()
+        }
+        
+        result = admin_requests_collection.insert_one(new_request)
+        new_request['id'] = str(result.inserted_id)
+        return json.loads(json_util.dumps(new_request)), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/admin-requests/user/<user_id>', methods=['GET'])
 def get_user_admin_request(user_id):
     try:

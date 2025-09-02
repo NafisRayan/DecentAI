@@ -138,6 +138,31 @@ function UserSettings() {
     setTimeout(() => setNotification(null), 3000);
   };
 
+  const handleReapplyRequest = async (requestId) => {
+    const newReason = prompt('Would you like to update your reason? (Leave empty to keep current reason):', userRequest?.reason || '');
+    
+    if (newReason === null) return; // User cancelled
+    
+    try {
+      const response = await fetch(`http://localhost:5000/admin-requests/${requestId}/reapply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: newReason || userRequest?.reason || '' })
+      });
+
+      if (response.ok) {
+        setNotification({ type: 'success', message: 'Admin request submitted successfully!' });
+        fetchUserRequest();
+      } else {
+        const error = await response.json();
+        setNotification({ type: 'error', message: error.error || 'Failed to reapply' });
+      }
+    } catch (error) {
+      setNotification({ type: 'error', message: 'Network error. Please try again.' });
+    }
+    setTimeout(() => setNotification(null), 3000);
+  };
+
   const handleMakeAdmin = async (userId) => {
     try {
       const response = await fetch('http://localhost:5000/admin/make-admin', {
@@ -302,6 +327,13 @@ function UserSettings() {
                       // Find user details from allUsers array
                       const requestingUser = allUsers.find(u => u.id === request.user_id);
                       
+                      // Check if this user has any previous rejected requests
+                      const hasPreviousRejections = adminRequests.some(r => 
+                        r.user_id === request.user_id && 
+                        r.status === 'rejected' && 
+                        r.id !== request.id
+                      );
+                      
                       return (
                         <div key={request.id} className="border rounded-lg p-4">
                           <div className="flex justify-between items-start mb-2">
@@ -309,6 +341,11 @@ function UserSettings() {
                               <p className="font-medium">
                                 {requestingUser ? requestingUser.username : 'Unknown User'} 
                                 {requestingUser && <span className="text-gray-500">({requestingUser.email})</span>}
+                                {hasPreviousRejections && (
+                                  <span className="ml-2 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">
+                                    Reapplication
+                                  </span>
+                                )}
                               </p>
                               <p className="text-xs text-gray-400">User ID: {request.user_id}</p>
                               <p className="text-sm text-gray-600">Reason: {request.reason}</p>
@@ -496,6 +533,20 @@ function UserSettings() {
                 </p>
                 {userRequest.status === 'pending' && (
                   <p className="text-sm text-gray-500">Please wait for admin approval</p>
+                )}
+                {userRequest.status === 'approved' && (
+                  <p className="text-sm text-green-600">Congratulations! You are now an admin.</p>
+                )}
+                {userRequest.status === 'rejected' && (
+                  <div className="space-y-3">
+                    <p className="text-sm text-red-600">Your request was rejected.</p>
+                    <button
+                      onClick={() => handleReapplyRequest(userRequest.id)}
+                      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                    >
+                      Reapply for Admin Access
+                    </button>
+                  </div>
                 )}
               </div>
             ) : (
