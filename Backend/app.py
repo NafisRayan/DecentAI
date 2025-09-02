@@ -30,10 +30,11 @@ transactions_collection = db.transactions
 chats_collection = db.chats
 polls_collection = db.polls
 analysis_history_collection = db.analysisHistory
+admin_requests_collection = db.adminRequests
 
 @app.route('/users', methods=['GET'])
 def get_users():
-    users = list(users_collection.find({}, {'password': 0})) # Exclude password from results
+    users = list(users_collection.find({}, {'password': 0}).sort('created_at', -1)) # Exclude password from results and sort by created_at descending
     # Convert ObjectIds to strings for frontend consistency
     for user in users:
         user['id'] = str(user['_id'])
@@ -56,7 +57,7 @@ def get_transactions():
         # Filter transactions where user is either sender or receiver
         user_transactions = list(transactions_collection.find({
             '$or': [{'senderId': user_object_id}, {'receiverId': user_object_id}]
-        }))
+        }).sort('timestamp', -1))  # Sort by timestamp descending (newest first)
         
         return json.loads(json_util.dumps(user_transactions))
     except Exception as e:
@@ -64,7 +65,7 @@ def get_transactions():
 
 @app.route('/chats', methods=['GET'])
 def get_chats():
-    chats = list(chats_collection.find({}))
+    chats = list(chats_collection.find({}).sort('timestamp', -1))  # Sort by timestamp descending (newest first)
     # Convert ObjectIds to strings for frontend consistency
     for chat in chats:
         chat['id'] = str(chat['_id'])
@@ -74,7 +75,7 @@ def get_chats():
 
 @app.route('/polls', methods=['GET'])
 def get_polls():
-    polls = list(polls_collection.find({}))
+    polls = list(polls_collection.find({}).sort('created_at', -1))  # Sort by created_at descending (newest first)
     for poll in polls:
         poll['id'] = str(poll['_id'])
         # Convert ObjectIds in voters array to strings for frontend consistency
@@ -151,6 +152,7 @@ def register():
         new_user_data['password'] = generate_password_hash(new_user_data['password'])
         new_user_data['points'] = 0
         new_user_data['avatar'] = '/default-avatar.png'
+        new_user_data['is_admin'] = False  # Add admin status
         # Use Bangladesh time (UTC+6)
         bangladesh_time = datetime.utcnow() + timedelta(hours=6)
         new_user_data['created_at'] = bangladesh_time.isoformat()
@@ -182,7 +184,8 @@ def login():
                 'username': user['username'],
                 'email': user['email'],
                 'points': user.get('points', 0),
-                'avatar': user.get('avatar', '/default-avatar.png')
+                'avatar': user.get('avatar', '/default-avatar.png'),
+                'is_admin': user.get('is_admin', False)
             }
             return json.loads(json_util.dumps(response_data))
         
@@ -206,7 +209,8 @@ def update_user(user_id):
             {'$set': {
                 'username': user_data.get('username'),
                 'email': user_data.get('email'),
-                'points': user_data.get('points')
+                'points': user_data.get('points'),
+                'is_admin': user_data.get('is_admin', False)
             }}
         )
         if result.matched_count:
@@ -292,6 +296,22 @@ def create_message():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/admin/clear-chats', methods=['DELETE'])
+def clear_all_chats():
+    try:
+        # Get count before deletion for response
+        chat_count = chats_collection.count_documents({})
+
+        # Delete all chat messages
+        result = chats_collection.delete_many({})
+
+        return jsonify({
+            'message': f'Successfully cleared {chat_count} chat messages',
+            'deleted_count': chat_count
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/analysis-history', methods=['POST'])
 def save_analysis_history():
     try:
@@ -312,7 +332,7 @@ def save_analysis_history():
 @app.route('/analysis-history', methods=['GET'])
 def get_analysis_history():
     try:
-        history = list(analysis_history_collection.find({}))
+        history = list(analysis_history_collection.find({}).sort('timestamp', -1))  # Sort by timestamp descending (newest first)
         for item in history:
             item['id'] = str(item['_id'])
         return json.loads(json_util.dumps(history))
@@ -331,12 +351,247 @@ def clear_analysis_history():
 @app.route('/analytics/transactions', methods=['GET'])
 def get_all_transactions():
     try:
-        transactions = list(transactions_collection.find({}))
+        transactions = list(transactions_collection.find({}).sort('timestamp', -1))  # Sort by timestamp descending (newest first)
         for transaction in transactions:
             transaction['id'] = str(transaction['_id'])
             transaction['senderId'] = str(transaction['senderId'])
             transaction['receiverId'] = str(transaction['receiverId'])
         return json.loads(json_util.dumps(transactions))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Admin Routes
+@app.route('/admin/make-admin', methods=['POST'])
+def make_admin():
+    try:
+        data = request.json
+        user_id = data.get('user_id')
+        
+        if not user_id:
+            return jsonify({'error': 'User ID is required'}), 400
+            
+        result = users_collection.update_one(
+            {'_id': ObjectId(user_id)},
+            {'$set': {'is_admin': True}}
+        )
+        
+        if result.matched_count:
+            return jsonify({'message': 'User promoted to admin successfully'}), 200
+        return jsonify({'error': 'User not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/remove-admin', methods=['POST'])
+def remove_admin():
+    try:
+        data = request.json
+        user_id = data.get('user_id')
+        
+        if not user_id:
+            return jsonify({'error': 'User ID is required'}), 400
+            
+        result = users_collection.update_one(
+            {'_id': ObjectId(user_id)},
+            {'$set': {'is_admin': False}}
+        )
+        
+        if result.matched_count:
+            return jsonify({'message': 'Admin status removed successfully'}), 200
+        return jsonify({'error': 'User not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/delete-user/<user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    try:
+        # First, get the user to check if they exist
+        user = users_collection.find_one({'_id': ObjectId(user_id)})
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        # Delete all related data in cascade
+        # 1. Delete user's transactions (both as sender and receiver)
+        transactions_collection.delete_many({
+            '$or': [{'senderId': ObjectId(user_id)}, {'receiverId': ObjectId(user_id)}]
+        })
+
+        # 2. Delete user's chat messages
+        chats_collection.delete_many({'userId': ObjectId(user_id)})
+
+        # 3. Delete polls created by the user
+        polls_collection.delete_many({'creatorId': ObjectId(user_id)})
+
+        # 4. Delete admin requests from the user
+        admin_requests_collection.delete_many({'user_id': ObjectId(user_id)})
+
+        # 5. Delete analysis history from the user
+        analysis_history_collection.delete_many({'userId': ObjectId(user_id)})
+
+        # 6. Finally, delete the user
+        result = users_collection.delete_one({'_id': ObjectId(user_id)})
+
+        if result.deleted_count:
+            return jsonify({
+                'message': 'User and all related data deleted successfully',
+                'deleted_data': {
+                    'user': 1,
+                    'transactions': 'all related',
+                    'chat_messages': 'all related',
+                    'polls': 'all created by user',
+                    'admin_requests': 'all related',
+                    'analysis_history': 'all related'
+                }
+            }), 200
+        return jsonify({'error': 'Failed to delete user'}), 500
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/delete-poll/<poll_id>', methods=['DELETE'])
+def delete_poll(poll_id):
+    try:
+        result = polls_collection.delete_one({'_id': ObjectId(poll_id)})
+        
+        if result.deleted_count:
+            return jsonify({'message': 'Poll deleted successfully'}), 200
+        return jsonify({'error': 'Poll not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/delete-admin-request/<request_id>', methods=['DELETE'])
+def delete_admin_request(request_id):
+    try:
+        result = admin_requests_collection.delete_one({'_id': ObjectId(request_id)})
+        
+        if result.deleted_count:
+            return jsonify({'message': 'Admin request deleted successfully'}), 200
+        return jsonify({'error': 'Admin request not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Admin Request Routes
+@app.route('/admin-requests', methods=['POST'])
+def create_admin_request():
+    try:
+        data = request.json
+        user_id = data.get('user_id')
+        reason = data.get('reason', '')
+        
+        if not user_id:
+            return jsonify({'error': 'User ID is required'}), 400
+            
+        # Check if user already has a pending request
+        existing_request = admin_requests_collection.find_one({
+            'user_id': user_id,
+            'status': 'pending'
+        })
+        
+        if existing_request:
+            return jsonify({'error': 'You already have a pending admin request'}), 400
+            
+        new_request = {
+            'user_id': user_id,
+            'reason': reason,
+            'status': 'pending',
+            'created_at': (datetime.utcnow() + timedelta(hours=6)).isoformat()
+        }
+        
+        result = admin_requests_collection.insert_one(new_request)
+        new_request['id'] = str(result.inserted_id)
+        return json.loads(json_util.dumps(new_request)), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin-requests', methods=['GET'])
+def get_admin_requests():
+    try:
+        requests = list(admin_requests_collection.find({}).sort('created_at', -1))  # Sort by created_at descending
+        for request_item in requests:
+            request_item['id'] = str(request_item['_id'])
+            del request_item['_id']
+        return json.loads(json_util.dumps(requests))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin-requests/<request_id>/approve', methods=['POST'])
+def approve_admin_request(request_id):
+    try:
+        # Update request status
+        result = admin_requests_collection.update_one(
+            {'_id': ObjectId(request_id)},
+            {'$set': {'status': 'approved'}}
+        )
+        
+        if result.matched_count:
+            # Get the request to find user_id
+            request_doc = admin_requests_collection.find_one({'_id': ObjectId(request_id)})
+            if request_doc:
+                # Make user admin
+                users_collection.update_one(
+                    {'_id': ObjectId(request_doc['user_id'])},
+                    {'$set': {'is_admin': True}}
+                )
+            return jsonify({'message': 'Admin request approved'}), 200
+        return jsonify({'error': 'Request not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin-requests/<request_id>/reject', methods=['POST'])
+def reject_admin_request(request_id):
+    try:
+        result = admin_requests_collection.update_one(
+            {'_id': ObjectId(request_id)},
+            {'$set': {'status': 'rejected'}}
+        )
+        
+        if result.matched_count:
+            return jsonify({'message': 'Admin request rejected'}), 200
+        return jsonify({'error': 'Request not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin-requests/<request_id>/reapply', methods=['POST'])
+def reapply_admin_request(request_id):
+    try:
+        # Get the existing request
+        existing_request = admin_requests_collection.find_one({'_id': ObjectId(request_id)})
+        if not existing_request:
+            return jsonify({'error': 'Request not found'}), 404
+            
+        # Check if user already has a pending request
+        pending_request = admin_requests_collection.find_one({
+            'user_id': existing_request['user_id'],
+            'status': 'pending'
+        })
+        
+        if pending_request:
+            return jsonify({'error': 'You already have a pending admin request'}), 400
+            
+        # Create new request with updated reason if provided
+        data = request.json or {}
+        new_reason = data.get('reason', existing_request.get('reason', ''))
+        
+        new_request = {
+            'user_id': existing_request['user_id'],
+            'reason': new_reason,
+            'status': 'pending',
+            'created_at': (datetime.utcnow() + timedelta(hours=6)).isoformat()
+        }
+        
+        result = admin_requests_collection.insert_one(new_request)
+        new_request['id'] = str(result.inserted_id)
+        return json.loads(json_util.dumps(new_request)), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin-requests/user/<user_id>', methods=['GET'])
+def get_user_admin_request(user_id):
+    try:
+        request_doc = admin_requests_collection.find_one({'user_id': user_id})
+        if request_doc:
+            request_doc['id'] = str(request_doc['_id'])
+            del request_doc['_id']
+            return json.loads(json_util.dumps(request_doc))
+        return jsonify({'message': 'No admin request found'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

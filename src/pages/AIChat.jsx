@@ -144,12 +144,15 @@ function AIChat() {
               <FaMicrophone />
             </button>
             <input
+              id="ai-chat-input"
+              name="message"
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              className="flex-1 p-2 border rounded"
               placeholder="Ask the AI assistant..."
+              className="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               disabled={isLoading}
+              aria-label="AI chat message input"
             />
             <button
               type="submit"

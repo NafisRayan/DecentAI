@@ -171,6 +171,12 @@ venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
+#### Start Backend Server
+
+```
+cd .\Backend\;venv\Scripts\Activate.ps1;python app.py
+```
+
 #### MongoDB Setup
 - **Option A: Local MongoDB**
   - Install MongoDB Community Server

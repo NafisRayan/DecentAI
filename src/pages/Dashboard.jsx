@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { FaUser, FaSignOutAlt, FaEdit } from 'react-icons/fa';
+import Modal from '../components/ui/Modal';
 
 function Dashboard() {
   const { user, setUser, logout } = useAuth();
@@ -11,6 +12,7 @@ function Dashboard() {
   const [editing, setEditing] = useState(false);
   const [notification, setNotification] = useState(null);
   const [updating, setUpdating] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [formData, setFormData] = useState({
     username: user?.username || '',
     email: user?.email || '',
@@ -30,7 +32,7 @@ function Dashboard() {
         // Fetch transactions
         const transactionsResponse = await fetch(`http://localhost:5000/transactions?userId=${user.id}`);
         const transactionsData = await transactionsResponse.json();
-        setRecentTransactions(transactionsData.slice(-5).reverse());
+        setRecentTransactions(transactionsData.slice(0, 5));  // Take first 5 (already sorted newest first from backend)
 
         // Fetch all polls and filter participated ones
         const pollsResponse = await fetch('http://localhost:5000/polls');
@@ -53,7 +55,7 @@ function Dashboard() {
         
         console.log('Filtered participated polls:', userParticipatedPolls);
         
-        setParticipatedPolls(userParticipatedPolls.reverse()); // Show all participated polls, most recent first
+        setParticipatedPolls(userParticipatedPolls); // Already sorted newest first from backend
       } catch (error) {
         setError('Failed to fetch data. Please try again later.');
       } finally {
@@ -142,13 +144,15 @@ function Dashboard() {
     }
   };
 
-  const handleLogout = async () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      try {
-        await logout();
-      } catch (error) {
-        console.error('Error logging out:', error);
-      }
+  const handleLogout = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Error logging out:', error);
     }
   };
 
@@ -210,25 +214,31 @@ function Dashboard() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Username</label>
+                <label htmlFor="edit-username" className="block text-sm font-medium mb-1">Username</label>
                 <input
+                  id="edit-username"
+                  name="username"
                   type="text"
                   value={formData.username}
                   onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                   className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   aria-label="Edit username"
                   disabled={updating}
+                  autoComplete="username"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Email</label>
+                <label htmlFor="edit-email" className="block text-sm font-medium mb-1">Email</label>
                 <input
+                  id="edit-email"
+                  name="email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   aria-label="Edit email"
                   disabled={updating}
+                  autoComplete="email"
                 />
               </div>
             </div>
@@ -348,6 +358,18 @@ function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Logout Confirmation Modal */}
+      <Modal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        title="Confirm Logout"
+        message="Are you sure you want to logout? You will need to log in again to access your account."
+        confirmText="Logout"
+        cancelText="Cancel"
+        onConfirm={confirmLogout}
+        type="warning"
+      />
     </div>
   );
 }

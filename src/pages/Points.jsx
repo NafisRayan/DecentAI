@@ -71,27 +71,35 @@ function Points() {
           <h2 className="text-lg font-semibold mb-4">Transfer Points</h2>
           <form onSubmit={handleTransfer} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Recipient ID</label>
+              <label htmlFor="recipient-id" className="block text-sm font-medium mb-1">Recipient ID</label>
               <input
+                id="recipient-id"
+                name="recipientId"
                 type="number"
                 value={recipientId}
                 onChange={(e) => setRecipientId(e.target.value)}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
                 min="0"
+                aria-describedby="recipient-help"
               />
+              <p id="recipient-help" className="text-xs text-gray-500 mt-1">Enter the user ID of the recipient</p>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Amount</label>
+              <label htmlFor="transfer-amount" className="block text-sm font-medium mb-1">Amount</label>
               <input
+                id="transfer-amount"
+                name="amount"
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 max={balance}
                 required
                 min="0"
+                aria-describedby="amount-help"
               />
+              <p id="amount-help" className="text-xs text-gray-500 mt-1">Enter the number of points to transfer (max: {balance})</p>
             </div>
             <button
               type="submit"
