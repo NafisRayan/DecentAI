@@ -3,6 +3,7 @@ import wink from 'wink-nlp';
 import model from 'wink-eng-lite-web-model';
 import modelArtifacts from '../contexts/model_artifacts.json';
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import ReactMarkdown from 'react-markdown';
 
 // Initialize wink-nlp outside the component
 const nlp = wink(model);
@@ -351,7 +352,9 @@ Created: ${poll.created_at || poll.timestamp || 'Unknown'}`;
             {chatSummary && (
               <div className="mt-4 p-4 bg-blue-50 rounded border-l-4 border-blue-500">
                 <h4 className="font-semibold text-blue-800 mb-2">Chat Sentiment Summary</h4>
-                <div className="text-gray-700 whitespace-pre-wrap">{chatSummary}</div>
+                <div className="text-gray-700 prose prose-sm max-w-none">
+                  <ReactMarkdown>{chatSummary}</ReactMarkdown>
+                </div>
               </div>
             )}
             
@@ -384,7 +387,9 @@ Created: ${poll.created_at || poll.timestamp || 'Unknown'}`;
             {pollsSummary && (
               <div className="mt-4 p-4 bg-purple-50 rounded border-l-4 border-purple-500">
                 <h4 className="font-semibold text-purple-800 mb-2">Polls Sentiment Summary</h4>
-                <div className="text-gray-700 whitespace-pre-wrap">{pollsSummary}</div>
+                <div className="text-gray-700 prose prose-sm max-w-none">
+                  <ReactMarkdown>{pollsSummary}</ReactMarkdown>
+                </div>
               </div>
             )}
             
