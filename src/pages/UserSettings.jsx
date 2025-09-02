@@ -18,9 +18,11 @@ function UserSettings() {
   const [showDeletePollModal, setShowDeletePollModal] = useState(false);
   const [showClearChatsModal, setShowClearChatsModal] = useState(false);
   const [showDeleteAdminRequestModal, setShowDeleteAdminRequestModal] = useState(false);
+  const [showUpdateReasonModal, setShowUpdateReasonModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedPollId, setSelectedPollId] = useState(null);
   const [selectedAdminRequestId, setSelectedAdminRequestId] = useState(null);
+  const [updatedReason, setUpdatedReason] = useState('');
 
   const fetchAdminData = useCallback(async () => {
     try {
@@ -134,20 +136,25 @@ function UserSettings() {
   };
 
   const handleReapplyRequest = async (requestId) => {
-    const newReason = prompt('Would you like to update your reason? (Leave empty to keep current reason):', userRequest?.reason || '');
-    
-    if (newReason === null) return; // User cancelled
-    
+    // Pre-populate the reason field with current reason
+    setUpdatedReason(userRequest?.reason || '');
+    setSelectedAdminRequestId(requestId);
+    setShowUpdateReasonModal(true);
+  };
+
+  const confirmUpdateReason = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/admin-requests/${requestId}/reapply`, {
+      const response = await fetch(`http://localhost:5000/admin-requests/${selectedAdminRequestId}/reapply`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: newReason || userRequest?.reason || '' })
+        body: JSON.stringify({ reason: updatedReason || userRequest?.reason || '' })
       });
 
       if (response.ok) {
         setNotification({ type: 'success', message: 'Admin request submitted successfully!' });
         fetchUserRequest();
+        setShowUpdateReasonModal(false);
+        setUpdatedReason('');
       } else {
         const error = await response.json();
         setNotification({ type: 'error', message: error.error || 'Failed to reapply' });
@@ -817,6 +824,44 @@ function UserSettings() {
         cancelText="Cancel"
         onConfirm={confirmDeleteAdminRequest}
         type="danger"
+      />
+
+      {/* Update Reason Modal */}
+      <Modal
+        isOpen={showUpdateReasonModal}
+        onClose={() => {
+          setShowUpdateReasonModal(false);
+          setUpdatedReason('');
+        }}
+        title="Update Admin Request Reason"
+        message={
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Would you like to update your reason for the admin request? Leave empty to keep the current reason.
+            </p>
+            <div>
+              <label htmlFor="update-reason" className="block text-sm font-medium text-gray-700 mb-2">
+                Reason
+              </label>
+              <textarea
+                id="update-reason"
+                value={updatedReason}
+                onChange={(e) => setUpdatedReason(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                rows={4}
+                placeholder="Enter your reason for requesting admin privileges..."
+                aria-describedby="reason-help"
+              />
+              <p id="reason-help" className="text-xs text-gray-500 mt-1">
+                Current reason: {userRequest?.reason || 'None'}
+              </p>
+            </div>
+          </div>
+        }
+        confirmText="Update & Reapply"
+        cancelText="Cancel"
+        onConfirm={confirmUpdateReason}
+        type="primary"
       />
     </div>
   );
