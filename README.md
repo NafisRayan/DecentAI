@@ -1,10 +1,10 @@
 # DecentAI
 
-A modern web application built with React and Python backend for AI-powered community engagement, featuring real-time sentiment analysis, interactive polls, and intelligent chat capabilities with comprehensive admin management tools.
+A modern web application built with React and Python backend for AI-powered community engagement, featuring real-time sentiment analysis, interactive polls, intelligent chat capabilities, and a comprehensive currency points system with transaction management tools.
 
 ## 📋 Project Overview
 
-DecentAI is a comprehensive platform that leverages artificial intelligence to facilitate meaningful community interactions and policy discussions. The platform combines advanced NLP capabilities with modern web technologies to provide real-time sentiment analysis, interactive polling systems, AI-powered chat functionality, and robust administrative controls.
+DecentAI is a comprehensive platform that leverages artificial intelligence to facilitate meaningful community interactions and policy discussions. The platform combines advanced NLP capabilities with modern web technologies to provide real-time sentiment analysis, interactive polling systems, AI-powered chat functionality, a robust currency points system with secure transactions, and comprehensive administrative controls.
 
 ## Screenshots
 
@@ -32,6 +32,14 @@ Here are some screenshots of the app showcasing its key features and design:
 
 ## 🚀 Core Features
 
+### 💰 Currency Points System
+- **Points Transfer**: Secure point transfers between users with username-based lookup
+- **Transaction History**: Complete transaction history with sent/received indicators
+- **Real-time Balance Updates**: Automatic balance synchronization across all components
+- **Color-coded Transactions**: Green for received points, red for sent points
+- **Transaction Analytics**: Visual graphs showing balance trends over time
+- **Smart Validation**: Prevents self-transfers and insufficient balance errors
+
 ### 🤖 AI-Powered Features
 - **Intelligent Chat**: AI-powered conversations using Google's Gemini API
 - **Real-time Sentiment Analysis**: Advanced NLP for text sentiment analysis
@@ -45,6 +53,7 @@ Here are some screenshots of the app showcasing its key features and design:
 - **Advanced Search**: Search functionality across all data tables
 - **Data Analytics Dashboard**: Comprehensive analytics with user insights
 - **Real-time Updates**: Live data synchronization across components
+- **Transaction Trends**: Visual graphs showing spending/receiving patterns
 
 ### 🔐 Security & Authentication
 - **JWT-based Authentication**: Secure user authentication system
@@ -92,7 +101,23 @@ Here are some screenshots of the app showcasing its key features and design:
 
 ## 🚀 Key Features Implemented
 
-### 🔍 Advanced Search Functionality
+### � Currency Points & Transaction System
+- **Username-based Transfers**: Transfer points using usernames instead of complex IDs
+- **Transaction History**: Complete history with sent/received indicators and timestamps
+- **Color-coded Transactions**: Green for received (+), red for sent (-) transactions
+- **Real-time Balance Updates**: Automatic balance synchronization across Dashboard and Points pages
+- **Transaction Analytics Graph**: Visual representation of balance trends over time
+- **Smart Validation**: Prevents self-transfers and validates sufficient balance
+- **Scrollable History**: Optimized scrolling with proper spacing and visual gaps
+
+### 📊 Enhanced Data Analytics
+- **Transaction Trend Graphs**: Visual charts showing transaction patterns over time
+- **Chronological Sorting**: Graphs progress from oldest to newest dates for better analysis
+- **User Registration Trends**: Visual representation of user growth over time
+- **Interactive Charts**: Hover tooltips and responsive design using Recharts
+- **Real-time Data Updates**: Live synchronization of analytics data
+
+### �🔍 Advanced Search Functionality
 - **Polls Search**: Search through poll titles and options with real-time filtering
 - **Data Analytics Search**: Search across users, chats, and transactions tables
 - **Smart Filtering**: Case-insensitive search with instant results
@@ -279,9 +304,10 @@ DecentAI/
 │   ├── pages/            # Main application pages
 │   │   ├── AIChat.jsx    # AI chat interface
 │   │   ├── Chat.jsx      # Chat functionality
-│   │   ├── Dashboard.jsx # Main dashboard
-│   │   ├── DataAnalytics.jsx # Analytics dashboard
+│   │   ├── Dashboard.jsx # Main dashboard with transaction history
+│   │   ├── DataAnalytics.jsx # Analytics dashboard with transaction graphs
 │   │   ├── LoginRegister.jsx # Authentication
+│   │   ├── Points.jsx    # Currency points system with transfer functionality
 │   │   ├── Polls.jsx     # Polling system
 │   │   ├── SentimentAnalysis.jsx # Sentiment analysis
 │   │   └── UserSettings.jsx # User settings & admin panel
@@ -300,6 +326,33 @@ DecentAI/
 
 ## 🆕 Recent Updates & Improvements
 
+### v2.1.0 - Currency Points & Transaction System
+
+#### 💰 Points Transfer System
+- **Username-based Transfers**: Simplified point transfers using usernames instead of user IDs
+- **Real-time Balance Updates**: Automatic balance synchronization across all components
+- **Transaction Validation**: Smart validation preventing self-transfers and insufficient balance
+- **Color-coded History**: Green for received points, red for sent points with +/- indicators
+- **Transaction Analytics**: Visual graphs showing balance trends and transaction patterns
+
+#### 📊 Enhanced Analytics & Visualization
+- **Transaction Trends Graph**: Interactive line chart showing balance changes over time
+- **Chronological Graph Sorting**: X-axis progresses from oldest to newest dates
+- **Responsive Charts**: Mobile-friendly charts with hover tooltips and detailed information
+- **Real-time Data Updates**: Live synchronization of transaction and analytics data
+
+#### 🎨 UI/UX Improvements
+- **Scrollable Transaction Cards**: Optimized scrolling with proper height management
+- **Visual Spacing**: Added gaps between transaction amounts and scrollbars for better readability
+- **Consistent Card Heights**: Balanced card heights across Dashboard and Points pages
+- **Enhanced Transaction Display**: Improved layout with better visual hierarchy
+
+#### 🔧 Backend Enhancements
+- **Transaction Processing**: Robust transaction handling with proper error management
+- **Data Integrity**: Cascading updates ensuring data consistency across components
+- **API Optimization**: Efficient data fetching and real-time updates
+- **Security Improvements**: Enhanced validation and secure transaction processing
+
 ### v2.0.0 - Enhanced Admin & Accessibility Features
 
 #### 🎨 UI/UX Enhancements
@@ -308,7 +361,7 @@ DecentAI/
 - **Accessibility Compliance**: Fixed form attributes, added proper ARIA labels, and improved keyboard navigation
 - **Responsive Design**: Improved mobile experience and cross-device compatibility
 
-#### � Administrative Features
+#### 🔧 Administrative Features
 - **Cascading User Deletion**: Complete data cleanup when deleting users (removes transactions, chats, polls, admin requests, analysis history)
 - **Individual Admin Request Management**: Delete specific admin requests with confirmation dialogs
 - **Chat Management**: Admin-only feature to clear all chat messages for system maintenance
@@ -362,7 +415,9 @@ DecentAI/
 - `GET /polls` - Get all polls
 - `POST /polls` - Create new poll
 - `POST /polls/<poll_id>/vote` - Vote on a poll
-- `GET /transactions` - Get all transactions
+- `GET /transactions` - Get user transactions with username resolution
+- `POST /transactions` - Create new transaction (point transfer)
+- `GET /analytics/transactions` - Get transaction analytics data
 
 ### Administrative Operations
 - `GET /admin-requests` - Get all admin requests
@@ -414,7 +469,17 @@ gunicorn --bind 0.0.0.0:5000 app:app
 
 ## 📈 Version History
 
-### v2.0.0 (Latest)
+### v2.1.0 (Latest) - Currency Points & Transaction System
+- ✅ **Points Transfer System**: Username-based point transfers with real-time validation
+- ✅ **Transaction History**: Complete transaction tracking with sent/received indicators
+- ✅ **Color-coded Transactions**: Green for received (+), red for sent (-) transactions
+- ✅ **Transaction Analytics Graph**: Visual balance trends and transaction patterns
+- ✅ **Scrollable UI**: Optimized scrolling with proper spacing and visual gaps
+- ✅ **Chronological Graphs**: X-axis progresses from oldest to newest dates
+- ✅ **Real-time Updates**: Automatic balance synchronization across components
+- ✅ **Enhanced UX**: Improved transaction display and visual hierarchy
+
+### v2.0.0
 - ✅ **Custom Modal System**: Professional confirmation dialogs
 - ✅ **Enhanced Admin Panel**: Complete user and content management
 - ✅ **Cascading Deletes**: Comprehensive data cleanup operations
