@@ -133,14 +133,22 @@ function DataAnalytics() {
     });
 
     return {
-      transactionTrend: Object.entries(transactionsByDate).map(([date, amount]) => ({
-        date,
-        amount
-      })),
-      userRegistrations: Object.entries(userRegistrationsByDate).map(([date, count]) => ({
-        date,
-        count
-      })),
+      transactionTrend: Object.entries(transactionsByDate)
+        .map(([date, amount]) => ({
+          date,
+          amount,
+          sortDate: new Date(date)
+        }))
+        .sort((a, b) => a.sortDate - b.sortDate)
+        .map(({ date, amount }) => ({ date, amount })),
+      userRegistrations: Object.entries(userRegistrationsByDate)
+        .map(([date, count]) => ({
+          date,
+          count,
+          sortDate: new Date(date)
+        }))
+        .sort((a, b) => a.sortDate - b.sortDate)
+        .map(({ date, count }) => ({ date, count })),
       pollStats: Object.entries(pollParticipation).map(([name, value]) => ({
         name,
         value
